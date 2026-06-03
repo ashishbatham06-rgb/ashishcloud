@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicSeedAdminRouteImport } from './routes/api/public/seed-admin'
 import { Route as ApiPublicSTokenRouteImport } from './routes/api/public/s.$token'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicSeedAdminRoute = ApiPublicSeedAdminRouteImport.update({
+  id: '/api/public/seed-admin',
+  path: '/api/public/seed-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicSTokenRoute = ApiPublicSTokenRouteImport.update({
@@ -25,27 +31,31 @@ const ApiPublicSTokenRoute = ApiPublicSTokenRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/s/$token'
+  fullPaths: '/' | '/api/public/seed-admin' | '/api/public/s/$token'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/s/$token'
-  id: '__root__' | '/' | '/api/public/s/$token'
+  to: '/' | '/api/public/seed-admin' | '/api/public/s/$token'
+  id: '__root__' | '/' | '/api/public/seed-admin' | '/api/public/s/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiPublicSeedAdminRoute: typeof ApiPublicSeedAdminRoute
   ApiPublicSTokenRoute: typeof ApiPublicSTokenRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/seed-admin': {
+      id: '/api/public/seed-admin'
+      path: '/api/public/seed-admin'
+      fullPath: '/api/public/seed-admin'
+      preLoaderRoute: typeof ApiPublicSeedAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/s/$token': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiPublicSeedAdminRoute: ApiPublicSeedAdminRoute,
   ApiPublicSTokenRoute: ApiPublicSTokenRoute,
 }
 export const routeTree = rootRouteImport
