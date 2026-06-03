@@ -277,8 +277,8 @@ function Dashboard() {
 
 
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
-        {/* Folder sidebar */}
-        <Card className="p-3 glass h-fit">
+        {/* Folder sidebar (desktop only) */}
+        <Card className="p-3 glass h-fit hidden lg:block sticky top-4">
           <div className="flex items-center justify-between px-2 py-1">
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Folders</p>
             <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setNewFolderOpen(true)} title="New folder">
