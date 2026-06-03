@@ -209,31 +209,76 @@ function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl font-semibold tracking-tight">
-            Hello{profile?.display_name ? `, ${profile.display_name}` : ""}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {meQ.data?.isAdmin ? "Admin workspace" : "Personal workspace"}
-          </p>
+      {/* Hero header */}
+      <div
+        className="rounded-2xl border border-border/60 p-6 sm:p-8 relative overflow-hidden"
+        style={{ background: "var(--gradient-hero), var(--background)" }}
+      >
+        <div className="flex flex-wrap items-end justify-between gap-4 relative">
+          <div>
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              {meQ.data?.isAdmin ? "Admin workspace" : "Your cloud"}
+            </p>
+            <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight mt-1">
+              Hello{profile?.display_name ? `, ${profile.display_name}` : ""} 👋
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {allFiles.length} file{allFiles.length !== 1 ? "s" : ""} • {folders.length} folder{folders.length !== 1 ? "s" : ""}
+            </p>
+          </div>
+          {profile && (
+            <Card className="p-4 min-w-[260px] glass">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Storage</span>
+                <span className="font-medium text-foreground">
+                  {bytes(Number(profile.storage_used_bytes))}
+                  <span className="text-muted-foreground"> / {bytes(Number(profile.storage_quota_bytes))}</span>
+                </span>
+              </div>
+              <Progress value={usedPct} className="mt-2 h-2" />
+              <p className="text-[10px] text-muted-foreground mt-1.5">
+                {usedPct < 80 ? `${(100 - usedPct).toFixed(0)}% free` : "Running low — clear some files"}
+              </p>
+            </Card>
+          )}
         </div>
-        {profile && (
-          <Card className="p-4 min-w-[260px] glass">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Storage used</span>
-              <span>
-                {bytes(Number(profile.storage_used_bytes))} / {bytes(Number(profile.storage_quota_bytes))}
-              </span>
-            </div>
-            <Progress value={usedPct} className="mt-2" />
-          </Card>
-        )}
       </div>
 
+      {/* Mobile folder chips */}
+      <div className="lg:hidden -mx-1 px-1 overflow-x-auto">
+        <div className="flex gap-2 min-w-min pb-1">
+          {folderList.map((f) => {
+            const active = activeFolder === f.name;
+            return (
+              <button
+                key={f.name}
+                onClick={() => setActiveFolder(f.name)}
+                className={cn(
+                  "shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition-colors",
+                  active
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background hover:bg-accent border-border",
+                )}
+              >
+                {active ? <FolderOpen className="size-3.5" /> : <Folder className="size-3.5" />}
+                {f.label}
+                <span className={cn("text-[10px]", active ? "text-primary-foreground/80" : "text-muted-foreground")}>{f.count}</span>
+              </button>
+            );
+          })}
+          <button
+            onClick={() => setNewFolderOpen(true)}
+            className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border border-dashed border-border hover:bg-accent"
+          >
+            <FolderPlus className="size-3.5" /> New
+          </button>
+        </div>
+      </div>
+
+
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
-        {/* Folder sidebar */}
-        <Card className="p-3 glass h-fit">
+        {/* Folder sidebar (desktop only) */}
+        <Card className="p-3 glass h-fit hidden lg:block sticky top-4">
           <div className="flex items-center justify-between px-2 py-1">
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Folders</p>
             <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setNewFolderOpen(true)} title="New folder">

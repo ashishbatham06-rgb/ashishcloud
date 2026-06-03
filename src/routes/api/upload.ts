@@ -8,7 +8,7 @@ export const Route = createFileRoute("/api/upload")({
       POST: async ({ request }) => {
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { makeKey, putObject, deleteObject, isR2Configured } = await import("@/lib/r2.server");
-        const { logAudit } = await import("@/lib/audit.server");
+        const { logAudit, rateLimit } = await import("@/lib/audit.server");
 
         try {
           if (!isR2Configured()) return new Response("Storage is not configured yet.", { status: 503 });
@@ -19,6 +19,14 @@ export const Route = createFileRoute("/api/upload")({
           const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser(token);
           if (userErr || !userData.user) return new Response("Unauthorized", { status: 401 });
           const userId = userData.user.id;
+
+          // Rate limit: 60 uploads per minute per user
+          if (!rateLimit(`upload:${userId}`, 60, 60_000)) {
+            return new Response("Too many uploads. Slow down and try again in a minute.", { status: 429 });
+          }
+
+          const ip = request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for") || null;
+          const ua = request.headers.get("user-agent") || null;
 
           const form = await request.formData();
           const file = form.get("file");
@@ -62,7 +70,7 @@ export const Route = createFileRoute("/api/upload")({
           }
 
           await supabaseAdmin.from("profiles").update({ storage_used_bytes: prof.storage_used_bytes + file.size }).eq("id", userId);
-          await logAudit({ actorId: userId, action: "file.upload", target: saved.id, meta: { size: file.size, name: file.name } });
+          await logAudit({ actorId: userId, action: "file.upload", target: saved.id, meta: { size: file.size, name: file.name, folder }, ip: ip ?? undefined, ua: ua ?? undefined });
           return Response.json(saved);
         } catch (error) {
           if (error instanceof Response) return error;
