@@ -112,6 +112,106 @@ export const listFiles = createServerFn({ method: "GET" })
     return data ?? [];
   });
 
+export const listFolders = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await supabaseAdmin
+      .from("folders")
+      .select("id, name, created_at")
+      .eq("owner_id", context.userId)
+      .order("name", { ascending: true });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const createFolder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { name: string }) =>
+    z.object({
+      name: z.string().trim().min(1).max(60).regex(/^[a-zA-Z0-9 _\-]+$/, "Only letters, numbers, space, _ and - allowed"),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: row, error } = await supabaseAdmin
+      .from("folders")
+      .insert({ owner_id: context.userId, name: data.name })
+      .select("id, name, created_at")
+      .single();
+    if (error) {
+      if (error.code === "23505") throw new Error("Folder already exists.");
+      throw new Error(error.message);
+    }
+    await logAudit({ actorId: context.userId, action: "folder.create", target: row.id, meta: { name: data.name } });
+    return row;
+  });
+
+export const deleteFolder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { name: string; moveTo?: string }) =>
+    z.object({
+      name: z.string().min(1).max(60),
+      moveTo: z.string().min(1).max(60).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const target = data.moveTo ?? "/";
+    await supabaseAdmin
+      .from("files")
+      .update({ folder: target })
+      .eq("owner_id", context.userId)
+      .eq("folder", data.name);
+    await supabaseAdmin
+      .from("folders")
+      .delete()
+      .eq("owner_id", context.userId)
+      .eq("name", data.name);
+    await logAudit({ actorId: context.userId, action: "folder.delete", meta: { name: data.name, moveTo: target } });
+    return { ok: true };
+  });
+
+export const moveFiles = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { fileIds: string[]; folder: string }) =>
+    z.object({
+      fileIds: z.array(z.string().uuid()).min(1).max(500),
+      folder: z.string().min(1).max(60),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    if (data.folder !== "/") {
+      const { data: f } = await supabaseAdmin
+        .from("folders")
+        .select("id")
+        .eq("owner_id", context.userId)
+        .eq("name", data.folder)
+        .maybeSingle();
+      if (!f) throw new Error("Folder not found.");
+    }
+    const { error } = await supabaseAdmin
+      .from("files")
+      .update({ folder: data.folder })
+      .in("id", data.fileIds)
+      .eq("owner_id", context.userId);
+    if (error) throw new Error(error.message);
+    await logAudit({ actorId: context.userId, action: "file.move", meta: { count: data.fileIds.length, folder: data.folder } });
+    return { ok: true };
+  });
+
+export const presignView = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { fileId: string }) => z.object({ fileId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: file } = await supabaseAdmin.from("files").select("*").eq("id", data.fileId).single();
+    if (!file) throw new Error("File not found.");
+    const { data: roles } = await supabaseAdmin.from("user_roles").select("role").eq("user_id", context.userId);
+    const isAdmin = roles?.some((r) => r.role === "admin");
+    if (file.owner_id !== context.userId && !isAdmin) throw new Error("Not allowed.");
+    // inline view (no attachment disposition)
+    const url = await presignGetUrl(file.r2_key);
+    await bumpBilling("class_b_ops", 1);
+    return { url, mime: file.mime, name: file.name };
+  });
+
 export const presignDownload = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { fileId: string }) => z.object({ fileId: z.string().uuid() }).parse(d))
