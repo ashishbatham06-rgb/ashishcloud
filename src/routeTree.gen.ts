@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as FeaturesRouteImport } from './routes/features'
@@ -17,6 +18,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicSeedAdminRouteImport } from './routes/api/public/seed-admin'
 import { Route as ApiPublicSTokenRouteImport } from './routes/api/public/s.$token'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HowItWorksRoute = HowItWorksRouteImport.update({
   id: '/how-it-works',
   path: '/how-it-works',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/features': typeof FeaturesRoute
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/login': typeof LoginRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/features': typeof FeaturesRoute
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/login': typeof LoginRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/features': typeof FeaturesRoute
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/login': typeof LoginRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
 }
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/features'
     | '/help'
     | '/how-it-works'
+    | '/login'
     | '/api/public/seed-admin'
     | '/api/public/s/$token'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/features'
     | '/help'
     | '/how-it-works'
+    | '/login'
     | '/api/public/seed-admin'
     | '/api/public/s/$token'
   id:
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/features'
     | '/help'
     | '/how-it-works'
+    | '/login'
     | '/api/public/seed-admin'
     | '/api/public/s/$token'
   fileRoutesById: FileRoutesById
@@ -117,12 +129,20 @@ export interface RootRouteChildren {
   FeaturesRoute: typeof FeaturesRoute
   HelpRoute: typeof HelpRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  LoginRoute: typeof LoginRoute
   ApiPublicSeedAdminRoute: typeof ApiPublicSeedAdminRoute
   ApiPublicSTokenRoute: typeof ApiPublicSTokenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/how-it-works': {
       id: '/how-it-works'
       path: '/how-it-works'
@@ -181,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   FeaturesRoute: FeaturesRoute,
   HelpRoute: HelpRoute,
   HowItWorksRoute: HowItWorksRoute,
+  LoginRoute: LoginRoute,
   ApiPublicSeedAdminRoute: ApiPublicSeedAdminRoute,
   ApiPublicSTokenRoute: ApiPublicSTokenRoute,
 }
