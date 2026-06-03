@@ -50,7 +50,7 @@ function Login() {
         setStage("otp");
         toast.success("Code sent to your email.");
       } else {
-        navigate({ to: "/dashboard" });
+        navigate({ to: res.isAdmin ? "/admin" : "/dashboard" });
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Sign-in failed.";
