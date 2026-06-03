@@ -6,15 +6,22 @@ import { generateOtpCode, hashSecret, compareSecret } from "@/lib/crypto.server"
 import { sendEmail, otpEmailHtml } from "@/lib/email.server";
 import { logAudit, rateLimit } from "@/lib/audit.server";
 
-// Step 1: After email+password sign-in succeeds client-side, this checks if user is admin.
-// If yes, generates an OTP, stores hash, emails it.
+// Email OTP disabled (no sender domain configured). Password auth alone is used.
+// To re-enable: set up an email domain, then restore OTP logic here.
 export const startAdminOtp = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const userId = context.userId;
-    if (!rateLimit(`otp-start:${userId}`, 5, 60_000)) {
+    if (!rateLimit(`otp-start:${userId}`, 10, 60_000)) {
       throw new Error("Too many requests. Please wait a minute.");
     }
+    const { data: prof } = await supabaseAdmin
+      .from("profiles")
+      .select("disabled")
+      .eq("id", userId)
+      .single();
+    if (prof?.disabled) throw new Error("Account disabled.");
+
     const { data: isAdmin } = await supabaseAdmin
       .from("user_roles")
       .select("role")
@@ -22,24 +29,8 @@ export const startAdminOtp = createServerFn({ method: "POST" })
       .eq("role", "admin")
       .maybeSingle();
 
-    if (!isAdmin) return { needsOtp: false };
-
-    const { data: prof } = await supabaseAdmin
-      .from("profiles")
-      .select("email, disabled")
-      .eq("id", userId)
-      .single();
-    if (!prof || prof.disabled) throw new Error("Account disabled.");
-
-    const code = generateOtpCode();
-    const code_hash = await hashSecret(code);
-    const expires_at = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-
-    await supabaseAdmin.from("admin_otps").insert({ user_id: userId, code_hash, expires_at });
-    const mail = otpEmailHtml(code);
-    await sendEmail({ to: prof.email, ...mail });
-    await logAudit({ actorId: userId, action: "admin.otp.sent" });
-    return { needsOtp: true };
+    await logAudit({ actorId: userId, action: isAdmin ? "admin.login" : "user.login" });
+    return { needsOtp: false, isAdmin: !!isAdmin };
   });
 
 export const verifyAdminOtp = createServerFn({ method: "POST" })
