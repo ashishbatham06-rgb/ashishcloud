@@ -14,7 +14,7 @@ export async function logAudit(opts: {
       actor_id: opts.actorId ?? null,
       action: opts.action,
       target: opts.target ?? null,
-      meta: opts.meta ?? {},
+      meta: (opts.meta ?? {}) as never,
       ip: opts.ip ?? null,
       ua: opts.ua ?? null,
     });
