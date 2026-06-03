@@ -1,35 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { makeKey, putObject, deleteObject, isR2Configured } from "@/lib/r2.server";
-import { logAudit } from "@/lib/audit.server";
 
 const MAX_FILE_BYTES = 1024 * 1024 * 1024;
-
-async function getUserId(request: Request) {
-  const authHeader = request.headers.get("authorization") || "";
-  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-  if (!token) throw new Response("Unauthorized", { status: 401 });
-  const { data, error } = await supabaseAdmin.auth.getUser(token);
-  if (error || !data.user) throw new Response("Unauthorized", { status: 401 });
-  return data.user.id;
-}
-
-async function bumpBilling(field: "class_a_ops" | "class_b_ops", by = 1) {
-  const { data } = await supabaseAdmin.from("billing_state").select(field).eq("id", 1).single();
-  const current = Number((data as Record<string, unknown> | null)?.[field] ?? 0);
-  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
-  patch[field] = current + by;
-  await supabaseAdmin.from("billing_state").update(patch as never).eq("id", 1);
-}
 
 export const Route = createFileRoute("/api/upload")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { makeKey, putObject, deleteObject, isR2Configured } = await import("@/lib/r2.server");
+        const { logAudit } = await import("@/lib/audit.server");
+
         try {
           if (!isR2Configured()) return new Response("Storage is not configured yet.", { status: 503 });
 
-          const userId = await getUserId(request);
+          const authHeader = request.headers.get("authorization") || "";
+          const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+          if (!token) return new Response("Unauthorized", { status: 401 });
+          const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser(token);
+          if (userErr || !userData.user) return new Response("Unauthorized", { status: 401 });
+          const userId = userData.user.id;
+
           const form = await request.formData();
           const file = form.get("file");
           const quality = String(form.get("quality") || "original");
@@ -49,7 +39,10 @@ export const Route = createFileRoute("/api/upload")({
           const key = makeKey(userId, file.name);
           const mime = file.type || "application/octet-stream";
           await putObject(key, new Uint8Array(await file.arrayBuffer()), mime);
-          await bumpBilling("class_a_ops", 1);
+
+          const { data: bs } = await supabaseAdmin.from("billing_state").select("class_a_ops").eq("id", 1).single();
+          const currentOps = Number((bs as Record<string, unknown> | null)?.class_a_ops ?? 0);
+          await supabaseAdmin.from("billing_state").update({ class_a_ops: currentOps + 1, updated_at: new Date().toISOString() } as never).eq("id", 1);
 
           const { data: saved, error } = await supabaseAdmin
             .from("files")
