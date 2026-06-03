@@ -70,7 +70,7 @@ export const Route = createFileRoute("/api/upload")({
           }
 
           await supabaseAdmin.from("profiles").update({ storage_used_bytes: prof.storage_used_bytes + file.size }).eq("id", userId);
-          await logAudit({ actorId: userId, action: "file.upload", target: saved.id, meta: { size: file.size, name: file.name } });
+          await logAudit({ actorId: userId, action: "file.upload", target: saved.id, meta: { size: file.size, name: file.name, folder }, ip: ip ?? undefined, ua: ua ?? undefined });
           return Response.json(saved);
         } catch (error) {
           if (error instanceof Response) return error;
