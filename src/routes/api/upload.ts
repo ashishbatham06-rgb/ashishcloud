@@ -8,7 +8,7 @@ export const Route = createFileRoute("/api/upload")({
       POST: async ({ request }) => {
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { makeKey, putObject, deleteObject, isR2Configured } = await import("@/lib/r2.server");
-        const { logAudit } = await import("@/lib/audit.server");
+        const { logAudit, rateLimit } = await import("@/lib/audit.server");
 
         try {
           if (!isR2Configured()) return new Response("Storage is not configured yet.", { status: 503 });
