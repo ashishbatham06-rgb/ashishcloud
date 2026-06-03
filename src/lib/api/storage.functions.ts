@@ -26,13 +26,11 @@ async function assertActiveProfile(userId: string) {
 }
 
 async function bumpBilling(field: "class_a_ops" | "class_b_ops", by = 1) {
-  // Best-effort counter increment (race tolerant — admin-only display).
   const { data } = await supabaseAdmin.from("billing_state").select(field).eq("id", 1).single();
   const current = Number((data as Record<string, unknown> | null)?.[field] ?? 0);
-  await supabaseAdmin
-    .from("billing_state")
-    .update({ [field]: current + by, updated_at: new Date().toISOString() })
-    .eq("id", 1);
+  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  patch[field] = current + by;
+  await supabaseAdmin.from("billing_state").update(patch as never).eq("id", 1);
 }
 
 export const presignUpload = createServerFn({ method: "POST" })
