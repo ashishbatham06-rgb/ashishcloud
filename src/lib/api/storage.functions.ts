@@ -10,7 +10,7 @@ import {
   isR2Configured,
 } from "@/lib/r2.server";
 import { generateToken, sha256, hashSecret } from "@/lib/crypto.server";
-import { logAudit } from "@/lib/audit.server";
+import { logAudit, rateLimit } from "@/lib/audit.server";
 
 const MAX_FILE_BYTES = 1024 * 1024 * 1024; // 1 GB
 
