@@ -14,16 +14,290 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      admin_otps: {
+        Row: {
+          attempts: number
+          code_hash: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          ip: string | null
+          meta: Json
+          target: string | null
+          ua: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          meta?: Json
+          target?: string | null
+          ua?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          meta?: Json
+          target?: string | null
+          ua?: string | null
+        }
+        Relationships: []
+      }
+      billing_state: {
+        Row: {
+          class_a_ops: number
+          class_b_ops: number
+          gb_month_used: number
+          id: number
+          period_start: string
+          updated_at: string
+        }
+        Insert: {
+          class_a_ops?: number
+          class_b_ops?: number
+          gb_month_used?: number
+          id?: number
+          period_start?: string
+          updated_at?: string
+        }
+        Update: {
+          class_a_ops?: number
+          class_b_ops?: number
+          gb_month_used?: number
+          id?: number
+          period_start?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      files: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          folder: string
+          id: string
+          mime: string | null
+          name: string
+          owner_id: string
+          quality: string
+          r2_key: string
+          size_bytes: number
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          folder?: string
+          id?: string
+          mime?: string | null
+          name: string
+          owner_id: string
+          quality?: string
+          r2_key: string
+          size_bytes: number
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          folder?: string
+          id?: string
+          mime?: string | null
+          name?: string
+          owner_id?: string
+          quality?: string
+          r2_key?: string
+          size_bytes?: number
+        }
+        Relationships: []
+      }
+      invites: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string
+          expires_at: string
+          id: string
+          quota_bytes: number
+          role: Database["public"]["Enums"]["app_role"]
+          token_hash: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email: string
+          expires_at: string
+          id?: string
+          quota_bytes?: number
+          role?: Database["public"]["Enums"]["app_role"]
+          token_hash: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          quota_bytes?: number
+          role?: Database["public"]["Enums"]["app_role"]
+          token_hash?: string
+          used_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          disabled: boolean
+          display_name: string | null
+          email: string
+          id: string
+          storage_quota_bytes: number
+          storage_used_bytes: number
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          disabled?: boolean
+          display_name?: string | null
+          email: string
+          id: string
+          storage_quota_bytes?: number
+          storage_used_bytes?: number
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          disabled?: boolean
+          display_name?: string | null
+          email?: string
+          id?: string
+          storage_quota_bytes?: number
+          storage_used_bytes?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      share_links: {
+        Row: {
+          created_at: string
+          created_by: string
+          downloads: number
+          expires_at: string | null
+          file_id: string
+          id: string
+          max_downloads: number | null
+          password_hash: string | null
+          revoked: boolean
+          token_hash: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          downloads?: number
+          expires_at?: string | null
+          file_id: string
+          id?: string
+          max_downloads?: number | null
+          password_hash?: string | null
+          revoked?: boolean
+          token_hash: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          downloads?: number
+          expires_at?: string | null
+          file_id?: string
+          id?: string
+          max_downloads?: number | null
+          password_hash?: string | null
+          revoked?: boolean
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "share_links_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +424,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
