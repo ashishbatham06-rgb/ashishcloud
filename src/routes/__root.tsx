@@ -78,14 +78,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Ashish cloud" },
+      { name: "description", content: "Ashish Cloud Vault is a secure cloud storage platform for file uploads, sharing, and management." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Ashish cloud" },
+      { property: "og:description", content: "Ashish Cloud Vault is a secure cloud storage platform for file uploads, sharing, and management." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Ashish cloud" },
+      { name: "twitter:description", content: "Ashish Cloud Vault is a secure cloud storage platform for file uploads, sharing, and management." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/44ec579e-c416-450b-87c8-4f76edde43ae/id-preview-a29d42c6--849a3cdc-53c6-4add-b25c-aebe6d66a883.lovable.app-1780491966534.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/44ec579e-c416-450b-87c8-4f76edde43ae/id-preview-a29d42c6--849a3cdc-53c6-4add-b25c-aebe6d66a883.lovable.app-1780491966534.png" },
     ],
     links: [
       {
