@@ -15,6 +15,7 @@ import { Route as HelpRouteImport } from './routes/help'
 import { Route as FeaturesRouteImport } from './routes/features'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as ApiPublicSeedAdminRouteImport } from './routes/api/public/seed-admin'
 import { Route as ApiPublicSTokenRouteImport } from './routes/api/public/s.$token'
 
@@ -48,6 +49,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InviteTokenRoute = InviteTokenRouteImport.update({
+  id: '/invite/$token',
+  path: '/invite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSeedAdminRoute = ApiPublicSeedAdminRouteImport.update({
   id: '/api/public/seed-admin',
   path: '/api/public/seed-admin',
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/help'
     | '/how-it-works'
     | '/login'
+    | '/invite/$token'
     | '/api/public/seed-admin'
     | '/api/public/s/$token'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/help'
     | '/how-it-works'
     | '/login'
+    | '/invite/$token'
     | '/api/public/seed-admin'
     | '/api/public/s/$token'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/help'
     | '/how-it-works'
     | '/login'
+    | '/invite/$token'
     | '/api/public/seed-admin'
     | '/api/public/s/$token'
   fileRoutesById: FileRoutesById
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   HelpRoute: typeof HelpRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LoginRoute: typeof LoginRoute
+  InviteTokenRoute: typeof InviteTokenRoute
   ApiPublicSeedAdminRoute: typeof ApiPublicSeedAdminRoute
   ApiPublicSTokenRoute: typeof ApiPublicSTokenRoute
 }
@@ -178,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/invite/$token': {
+      id: '/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof InviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/seed-admin': {
       id: '/api/public/seed-admin'
       path: '/api/public/seed-admin'
@@ -202,6 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   HelpRoute: HelpRoute,
   HowItWorksRoute: HowItWorksRoute,
   LoginRoute: LoginRoute,
+  InviteTokenRoute: InviteTokenRoute,
   ApiPublicSeedAdminRoute: ApiPublicSeedAdminRoute,
   ApiPublicSTokenRoute: ApiPublicSTokenRoute,
 }
