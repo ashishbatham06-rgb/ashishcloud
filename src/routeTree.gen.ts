@@ -9,11 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as FeaturesRouteImport } from './routes/features'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicSeedAdminRouteImport } from './routes/api/public/seed-admin'
 import { Route as ApiPublicSTokenRouteImport } from './routes/api/public/s.$token'
 
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FeaturesRoute = FeaturesRouteImport.update({
   id: '/features',
   path: '/features',
@@ -38,12 +44,14 @@ const ApiPublicSTokenRoute = ApiPublicSTokenRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/features': typeof FeaturesRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/features': typeof FeaturesRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
 }
@@ -51,6 +59,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/features': typeof FeaturesRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
 }
@@ -59,14 +68,21 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/features'
+    | '/how-it-works'
     | '/api/public/seed-admin'
     | '/api/public/s/$token'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/features' | '/api/public/seed-admin' | '/api/public/s/$token'
+  to:
+    | '/'
+    | '/features'
+    | '/how-it-works'
+    | '/api/public/seed-admin'
+    | '/api/public/s/$token'
   id:
     | '__root__'
     | '/'
     | '/features'
+    | '/how-it-works'
     | '/api/public/seed-admin'
     | '/api/public/s/$token'
   fileRoutesById: FileRoutesById
@@ -74,12 +90,20 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FeaturesRoute: typeof FeaturesRoute
+  HowItWorksRoute: typeof HowItWorksRoute
   ApiPublicSeedAdminRoute: typeof ApiPublicSeedAdminRoute
   ApiPublicSTokenRoute: typeof ApiPublicSTokenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/features': {
       id: '/features'
       path: '/features'
@@ -114,6 +138,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FeaturesRoute: FeaturesRoute,
+  HowItWorksRoute: HowItWorksRoute,
   ApiPublicSeedAdminRoute: ApiPublicSeedAdminRoute,
   ApiPublicSTokenRoute: ApiPublicSTokenRoute,
 }
