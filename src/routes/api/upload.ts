@@ -23,9 +23,16 @@ export const Route = createFileRoute("/api/upload")({
           const form = await request.formData();
           const file = form.get("file");
           const quality = String(form.get("quality") || "original");
+          const folder = String(form.get("folder") || "/").trim() || "/";
           if (!(file instanceof File)) return new Response("Missing file.", { status: 400 });
           if (!file.size || file.size > MAX_FILE_BYTES) return new Response("Invalid file size.", { status: 400 });
           if (!["original", "high", "medium"].includes(quality)) return new Response("Invalid quality.", { status: 400 });
+          if (folder !== "/" && !/^[a-zA-Z0-9 _\-]{1,60}$/.test(folder)) return new Response("Invalid folder.", { status: 400 });
+
+          if (folder !== "/") {
+            const { data: f } = await supabaseAdmin.from("folders").select("id").eq("owner_id", userId).eq("name", folder).maybeSingle();
+            if (!f) return new Response("Folder not found.", { status: 404 });
+          }
 
           const { data: prof } = await supabaseAdmin
             .from("profiles")
