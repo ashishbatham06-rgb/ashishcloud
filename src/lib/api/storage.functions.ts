@@ -261,6 +261,7 @@ export const createShareLink = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
+    if (!rateLimit(`share:${context.userId}`, 20, 60_000)) throw new Error("Too many share links. Try again in a minute.");
     const { data: file } = await supabaseAdmin.from("files").select("id, owner_id").eq("id", data.fileId).single();
     if (!file || file.owner_id !== context.userId) throw new Error("Not allowed.");
     const token = generateToken(24);
