@@ -53,7 +53,7 @@ export const Route = createFileRoute("/api/upload")({
 
           const { data: saved, error } = await supabaseAdmin
             .from("files")
-            .insert({ owner_id: userId, r2_key: key, name: file.name, size_bytes: file.size, mime, quality })
+            .insert({ owner_id: userId, r2_key: key, name: file.name, size_bytes: file.size, mime, quality, folder })
             .select("*")
             .single();
           if (error) {
