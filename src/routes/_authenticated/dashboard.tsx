@@ -16,8 +16,9 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { getMe } from "@/lib/api/auth.functions";
 import {
-  presignUpload, confirmUpload, listFiles, presignDownload, softDeleteFile, createShareLink,
+  listFiles, presignDownload, softDeleteFile, createShareLink,
 } from "@/lib/api/storage.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Download, Trash2, Share2, Upload, FileIcon, Loader2, Copy } from "lucide-react";
 
@@ -36,8 +37,6 @@ function bytes(n: number) {
 function Dashboard() {
   const qc = useQueryClient();
   const me = useServerFn(getMe);
-  const presignFn = useServerFn(presignUpload);
-  const confirmFn = useServerFn(confirmUpload);
   const listFn = useServerFn(listFiles);
   const downloadFn = useServerFn(presignDownload);
   const deleteFn = useServerFn(softDeleteFile);
@@ -62,16 +61,20 @@ function Dashboard() {
     let okCount = 0;
     for (const file of files) {
       try {
-        const { uploadUrl, key } = await presignFn({
-          data: { name: file.name, size: file.size, mime: file.type || "application/octet-stream", quality },
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
+        if (!token) throw new Error("Please log in again.");
+
+        const form = new FormData();
+        form.append("file", file);
+        form.append("quality", quality);
+
+        const uploaded = await fetch("/api/upload", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: form,
         });
-        const put = await fetch(uploadUrl, {
-          method: "PUT",
-          headers: { "Content-Type": file.type || "application/octet-stream" },
-          body: file,
-        });
-        if (!put.ok) throw new Error(`Upload failed: ${put.status}`);
-        await confirmFn({ data: { key, name: file.name, size: file.size, mime: file.type || "application/octet-stream", quality } });
+        if (!uploaded.ok) throw new Error((await uploaded.text()) || `Upload failed: ${uploaded.status}`);
         okCount++;
       } catch (e: unknown) {
         toast.error(`${file.name}: ${e instanceof Error ? e.message : "failed"}`);
@@ -81,7 +84,7 @@ function Dashboard() {
     if (okCount) toast.success(`Uploaded ${okCount} file${okCount > 1 ? "s" : ""}.`);
     qc.invalidateQueries({ queryKey: ["files"] });
     qc.invalidateQueries({ queryKey: ["me"] });
-  }, [presignFn, confirmFn, quality, qc]);
+  }, [quality, qc]);
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
