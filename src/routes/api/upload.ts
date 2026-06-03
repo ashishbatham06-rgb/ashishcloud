@@ -20,6 +20,14 @@ export const Route = createFileRoute("/api/upload")({
           if (userErr || !userData.user) return new Response("Unauthorized", { status: 401 });
           const userId = userData.user.id;
 
+          // Rate limit: 60 uploads per minute per user
+          if (!rateLimit(`upload:${userId}`, 60, 60_000)) {
+            return new Response("Too many uploads. Slow down and try again in a minute.", { status: 429 });
+          }
+
+          const ip = request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for") || null;
+          const ua = request.headers.get("user-agent") || null;
+
           const form = await request.formData();
           const file = form.get("file");
           const quality = String(form.get("quality") || "original");
