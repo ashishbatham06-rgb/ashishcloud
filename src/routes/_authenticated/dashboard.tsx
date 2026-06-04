@@ -117,19 +117,27 @@ function Dashboard() {
     let okCount = 0;
     for (const file of files) {
       try {
-        const { data: sessionData } = await supabase.auth.getSession();
-        const token = sessionData.session?.access_token;
-        if (!token) throw new Error("Please log in again.");
-        const form = new FormData();
-        form.append("file", file);
-        form.append("quality", quality);
-        form.append("folder", activeFolder);
-        const res = await fetch("/api/upload", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: form,
+        const mime = file.type || "application/octet-stream";
+        // 1) Get presigned PUT URL from our server
+        const { uploadUrl, key } = await presignFn({
+          data: { name: file.name, size: file.size, mime, quality },
         });
-        if (!res.ok) throw new Error((await res.text()) || `Upload failed: ${res.status}`);
+        // 2) Upload directly to R2 via XHR (streams without buffering in worker memory)
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("PUT", uploadUrl, true);
+          xhr.setRequestHeader("Content-Type", mime);
+          xhr.onload = () =>
+            xhr.status >= 200 && xhr.status < 300
+              ? resolve()
+              : reject(new Error(`R2 upload failed: ${xhr.status}`));
+          xhr.onerror = () => reject(new Error("Network error during upload"));
+          xhr.send(file);
+        });
+        // 3) Confirm in DB
+        await confirmFn({
+          data: { key, name: file.name, size: file.size, mime, quality, folder: activeFolder },
+        });
         okCount++;
       } catch (e: unknown) {
         toast.error(`${file.name}: ${e instanceof Error ? e.message : "failed"}`);
@@ -142,7 +150,7 @@ function Dashboard() {
     if (okCount) toast.success(`Uploaded ${okCount} file${okCount > 1 ? "s" : ""}.`);
     qc.invalidateQueries({ queryKey: ["files"] });
     qc.invalidateQueries({ queryKey: ["me"] });
-  }, [quality, qc, activeFolder]);
+  }, [quality, qc, activeFolder, presignFn, confirmFn]);
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
