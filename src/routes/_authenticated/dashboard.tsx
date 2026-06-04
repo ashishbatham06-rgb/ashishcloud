@@ -683,7 +683,7 @@ function ShareDialog({
   const [token, setToken] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const url = useMemo(() => (token ? `${typeof window !== "undefined" ? window.location.origin : ""}/api/public/s/${token}` : null), [token]);
+  const url = useMemo(() => (token ? `${typeof window !== "undefined" ? window.location.origin : ""}/s/${token}` : null), [token]);
 
   const create = async () => {
     if (!target) return;
@@ -742,7 +742,7 @@ function ShareDialog({
                 <Copy className="size-4" />
               </Button>
             </div>
-            {password && <p className="text-xs text-muted-foreground">Send the password separately. Append <code>?p=PASSWORD</code> to the URL.</p>}
+            {password && <p className="text-xs text-muted-foreground">Send the password to the recipient through a separate, secure channel — they will enter it on the share page.</p>}
           </div>
         )}
         <DialogFooter>

@@ -65,8 +65,9 @@ export const Route = createFileRoute("/api/upload")({
             .select("*")
             .single();
           if (error) {
+            console.error("[upload] db insert failed", error);
             await deleteObject(key).catch(() => null);
-            return new Response(error.message, { status: 500 });
+            return new Response("Could not save file. Please try again.", { status: 500 });
           }
 
           await supabaseAdmin.from("profiles").update({ storage_used_bytes: prof.storage_used_bytes + file.size }).eq("id", userId);
@@ -74,7 +75,8 @@ export const Route = createFileRoute("/api/upload")({
           return Response.json(saved);
         } catch (error) {
           if (error instanceof Response) return error;
-          return new Response(error instanceof Error ? error.message : "Upload failed.", { status: 500 });
+          console.error("[upload] internal error", error);
+          return new Response("Upload failed. Please try again.", { status: 500 });
         }
       },
     },
