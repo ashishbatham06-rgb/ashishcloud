@@ -52,6 +52,10 @@ export const presignUpload = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     if (!isR2Configured()) throw new Error("Storage is not configured yet. Admin needs to add Cloudflare R2 secrets.");
+    if (BLOCKED_MIME.has(data.mime) || BLOCKED_EXT.test(data.name)) {
+      throw new Error("This file type is not allowed for security reasons.");
+    }
+    if (!rateLimit(`presign:${context.userId}`, 120, 60_000)) throw new Error("Too many uploads. Try again in a minute.");
     const userId = context.userId;
     const prof = await assertActiveProfile(userId);
     if (prof.storage_used_bytes + data.size > prof.storage_quota_bytes) {
