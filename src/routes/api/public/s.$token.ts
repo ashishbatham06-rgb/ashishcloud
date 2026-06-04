@@ -29,9 +29,12 @@ export const Route = createFileRoute("/api/public/s/$token")({
           const ok = await compareSecret(password, link.password_hash);
           if (!ok) return new Response("Wrong password", { status: 403 });
         }
-        const { data: file } = await supabaseAdmin.from("files").select("r2_key, name").eq("id", link.file_id).single();
+        const { data: file } = await supabaseAdmin.from("files").select("r2_key, name, mime").eq("id", link.file_id).single();
         if (!file) return new Response("File missing", { status: 404 });
-        const signed = await presignGetUrl(file.r2_key, file.name);
+        // Inline preview for images/videos/pdf; attachment download otherwise (or when ?dl=1)
+        const forceDl = url.searchParams.get("dl") === "1";
+        const inlineOk = !!file.mime && (file.mime.startsWith("image/") || file.mime.startsWith("video/") || file.mime.startsWith("audio/") || file.mime === "application/pdf");
+        const signed = await presignGetUrl(file.r2_key, forceDl || !inlineOk ? file.name : undefined);
         await supabaseAdmin.from("share_links").update({ downloads: link.downloads + 1 }).eq("id", link.id);
         await logAudit({ action: "share.download", target: link.file_id, meta: { ip } });
         return Response.redirect(signed, 302);

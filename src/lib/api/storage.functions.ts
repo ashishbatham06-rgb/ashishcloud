@@ -14,6 +14,13 @@ import { logAudit, rateLimit } from "@/lib/audit.server";
 
 const MAX_FILE_BYTES = 1024 * 1024 * 1024; // 1 GB
 
+// Block obvious executable/script types for security.
+const BLOCKED_MIME = new Set([
+  "application/x-msdownload", "application/x-msdos-program", "application/x-ms-installer",
+  "application/x-sh", "application/x-bat", "application/x-msi",
+]);
+const BLOCKED_EXT = /\.(exe|bat|cmd|com|msi|scr|ps1|sh|jar|app|dmg|deb|rpm)$/i;
+
 async function assertActiveProfile(userId: string) {
   const { data } = await supabaseAdmin
     .from("profiles")
@@ -45,6 +52,10 @@ export const presignUpload = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     if (!isR2Configured()) throw new Error("Storage is not configured yet. Admin needs to add Cloudflare R2 secrets.");
+    if (BLOCKED_MIME.has(data.mime) || BLOCKED_EXT.test(data.name)) {
+      throw new Error("This file type is not allowed for security reasons.");
+    }
+    if (!rateLimit(`presign:${context.userId}`, 120, 60_000)) throw new Error("Too many uploads. Try again in a minute.");
     const userId = context.userId;
     const prof = await assertActiveProfile(userId);
     if (prof.storage_used_bytes + data.size > prof.storage_quota_bytes) {
