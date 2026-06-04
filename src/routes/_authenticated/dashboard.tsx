@@ -66,6 +66,8 @@ function Dashboard() {
   const deleteFolderFn = useServerFn(deleteFolder);
   const moveFn = useServerFn(moveFiles);
   const viewFn = useServerFn(presignView);
+  const presignFn = useServerFn(presignUpload);
+  const confirmFn = useServerFn(confirmUpload);
 
   const meQ = useQuery({ queryKey: ["me"], queryFn: () => me() });
   const filesQ = useQuery({ queryKey: ["files"], queryFn: () => listFn() });
