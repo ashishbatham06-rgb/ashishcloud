@@ -18,8 +18,8 @@ import { getMe } from "@/lib/api/auth.functions";
 import {
   listFiles, presignDownload, softDeleteFile, createShareLink,
   listFolders, createFolder, deleteFolder, moveFiles, presignView,
+  presignUpload, confirmUpload,
 } from "@/lib/api/storage.functions";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Download, Trash2, Share2, Upload, FileIcon, Loader2, Copy, FolderPlus,
