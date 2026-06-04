@@ -14,6 +14,13 @@ import { logAudit, rateLimit } from "@/lib/audit.server";
 
 const MAX_FILE_BYTES = 1024 * 1024 * 1024; // 1 GB
 
+// Block obvious executable/script types for security.
+const BLOCKED_MIME = new Set([
+  "application/x-msdownload", "application/x-msdos-program", "application/x-ms-installer",
+  "application/x-sh", "application/x-bat", "application/x-msi",
+]);
+const BLOCKED_EXT = /\.(exe|bat|cmd|com|msi|scr|ps1|sh|jar|app|dmg|deb|rpm)$/i;
+
 async function assertActiveProfile(userId: string) {
   const { data } = await supabaseAdmin
     .from("profiles")
