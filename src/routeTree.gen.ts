@@ -21,6 +21,7 @@ import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as ApiPublicUserExistsRouteImport } from './routes/api/public/user-exists'
 import { Route as ApiPublicSeedAdminRouteImport } from './routes/api/public/seed-admin'
 import { Route as ApiPublicSTokenRouteImport } from './routes/api/public/s.$token'
 
@@ -83,6 +84,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicUserExistsRoute = ApiPublicUserExistsRouteImport.update({
+  id: '/api/public/user-exists',
+  path: '/api/public/user-exists',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSeedAdminRoute = ApiPublicSeedAdminRouteImport.update({
   id: '/api/public/seed-admin',
   path: '/api/public/seed-admin',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/invite/$token': typeof InviteTokenRoute
   '/s/$token': typeof STokenRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
+  '/api/public/user-exists': typeof ApiPublicUserExistsRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
 }
 export interface FileRoutesByTo {
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/invite/$token': typeof InviteTokenRoute
   '/s/$token': typeof STokenRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
+  '/api/public/user-exists': typeof ApiPublicUserExistsRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
 }
 export interface FileRoutesById {
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/invite/$token': typeof InviteTokenRoute
   '/s/$token': typeof STokenRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
+  '/api/public/user-exists': typeof ApiPublicUserExistsRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
 }
 export interface FileRouteTypes {
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/s/$token'
     | '/api/public/seed-admin'
+    | '/api/public/user-exists'
     | '/api/public/s/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/s/$token'
     | '/api/public/seed-admin'
+    | '/api/public/user-exists'
     | '/api/public/s/$token'
   id:
     | '__root__'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/s/$token'
     | '/api/public/seed-admin'
+    | '/api/public/user-exists'
     | '/api/public/s/$token'
   fileRoutesById: FileRoutesById
 }
@@ -202,6 +214,7 @@ export interface RootRouteChildren {
   InviteTokenRoute: typeof InviteTokenRoute
   STokenRoute: typeof STokenRoute
   ApiPublicSeedAdminRoute: typeof ApiPublicSeedAdminRoute
+  ApiPublicUserExistsRoute: typeof ApiPublicUserExistsRoute
   ApiPublicSTokenRoute: typeof ApiPublicSTokenRoute
 }
 
@@ -291,6 +304,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/user-exists': {
+      id: '/api/public/user-exists'
+      path: '/api/public/user-exists'
+      fullPath: '/api/public/user-exists'
+      preLoaderRoute: typeof ApiPublicUserExistsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/seed-admin': {
       id: '/api/public/seed-admin'
       path: '/api/public/seed-admin'
@@ -333,6 +353,7 @@ const rootRouteChildren: RootRouteChildren = {
   InviteTokenRoute: InviteTokenRoute,
   STokenRoute: STokenRoute,
   ApiPublicSeedAdminRoute: ApiPublicSeedAdminRoute,
+  ApiPublicUserExistsRoute: ApiPublicUserExistsRoute,
   ApiPublicSTokenRoute: ApiPublicSTokenRoute,
 }
 export const routeTree = rootRouteImport
