@@ -88,8 +88,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Ashish cloud" },
       { name: "twitter:description", content: "Ashish Cloud Vault is a secure cloud storage platform for file uploads, sharing, and management." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/44ec579e-c416-450b-87c8-4f76edde43ae/id-preview-a29d42c6--849a3cdc-53c6-4add-b25c-aebe6d66a883.lovable.app-1780491966534.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/44ec579e-c416-450b-87c8-4f76edde43ae/id-preview-a29d42c6--849a3cdc-53c6-4add-b25c-aebe6d66a883.lovable.app-1780491966534.png" },
     ],
     links: [
       {
