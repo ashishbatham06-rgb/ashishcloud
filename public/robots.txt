@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /_authenticated/
+Disallow: /s/
+Disallow: /invite/
+Disallow: /api/
+
+Sitemap: https://ashishcloud.lovable.app/sitemap.xml
