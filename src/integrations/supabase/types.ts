@@ -208,6 +208,7 @@ export type Database = {
           display_name: string | null
           email: string
           id: string
+          phone: string | null
           storage_quota_bytes: number
           storage_used_bytes: number
           updated_at: string
@@ -219,6 +220,7 @@ export type Database = {
           display_name?: string | null
           email: string
           id: string
+          phone?: string | null
           storage_quota_bytes?: number
           storage_used_bytes?: number
           updated_at?: string
@@ -230,6 +232,7 @@ export type Database = {
           display_name?: string | null
           email?: string
           id?: string
+          phone?: string | null
           storage_quota_bytes?: number
           storage_used_bytes?: number
           updated_at?: string
