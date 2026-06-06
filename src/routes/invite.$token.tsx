@@ -116,6 +116,8 @@ function Invite() {
   const [busy, setBusy] = useState(false);
   const [resendIn, setResendIn] = useState(0);
   const accessTokenRef = useRef<string>("");
+  const reqIdRef = useRef<string>("");
+
 
   const ready = useMsg91(cfg?.widgetId ?? "", cfg?.tokenAuth ?? "", stage === "otp");
 
