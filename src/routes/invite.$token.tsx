@@ -236,7 +236,7 @@ function Invite() {
 
   const resend = async () => {
     if (resendIn > 0) return;
-    if (!window.retryOtp) return sendOtp();
+    if (!window.retryOtp || !reqIdRef.current) return sendOtp();
     setBusy(true);
     await new Promise<void>((resolve) => {
       window.retryOtp!(
@@ -247,7 +247,9 @@ function Invite() {
           toast.error(msg);
           resolve();
         },
+        reqIdRef.current,
       );
+
     });
     setBusy(false);
   };
