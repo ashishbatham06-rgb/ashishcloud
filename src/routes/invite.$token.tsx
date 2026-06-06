@@ -197,13 +197,15 @@ function Invite() {
         window.verifyOtp!(
           code,
           (d) => {
-            const t = extractToken(d) || accessTokenRef.current;
-            if (!t) return reject(new Error("No access token returned."));
+            const t = (typeof d === "object" && d?.access_token) || extractToken(d) || accessTokenRef.current;
+            if (!t || t.length < 10) return reject(new Error("No access token returned."));
             resolve(t);
           },
           (e2) => reject(new Error(typeof e2 === "string" ? e2 : (e2?.message ?? "Invalid OTP."))),
+          reqIdRef.current || undefined,
         );
       });
+
 
       await acceptFn({
         data: {
