@@ -146,9 +146,13 @@ function Invite() {
       window.sendOtp!(
         normalisedPhone,
         (d) => {
-          // Some flows return the access-token here too (auto-verify).
-          const t = extractToken(d);
-          if (t && t.length > 20) accessTokenRef.current = t;
+          // sendOtp success returns reqId (in `message` or as a string).
+          // We MUST pass this reqId back into verifyOtp / retryOtp, otherwise
+          // MSG91 responds with "reqId is required".
+          const reqId = extractToken(d);
+          if (reqId) reqIdRef.current = reqId;
+          // Some flows additionally pre-issue an access-token (auto-verify).
+          if (typeof d === "object" && d?.access_token) accessTokenRef.current = d.access_token;
           toast.success("OTP sent to your phone.");
           setResendIn(30);
           resolve();
@@ -159,6 +163,7 @@ function Invite() {
           resolve();
         },
       );
+
     });
     setBusy(false);
   };
