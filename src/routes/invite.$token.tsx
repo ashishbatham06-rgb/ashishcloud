@@ -116,6 +116,8 @@ function Invite() {
   const [busy, setBusy] = useState(false);
   const [resendIn, setResendIn] = useState(0);
   const accessTokenRef = useRef<string>("");
+  const reqIdRef = useRef<string>("");
+
 
   const ready = useMsg91(cfg?.widgetId ?? "", cfg?.tokenAuth ?? "", stage === "otp");
 
@@ -144,9 +146,13 @@ function Invite() {
       window.sendOtp!(
         normalisedPhone,
         (d) => {
-          // Some flows return the access-token here too (auto-verify).
-          const t = extractToken(d);
-          if (t && t.length > 20) accessTokenRef.current = t;
+          // sendOtp success returns reqId (in `message` or as a string).
+          // We MUST pass this reqId back into verifyOtp / retryOtp, otherwise
+          // MSG91 responds with "reqId is required".
+          const reqId = extractToken(d);
+          if (reqId) reqIdRef.current = reqId;
+          // Some flows additionally pre-issue an access-token (auto-verify).
+          if (typeof d === "object" && d?.access_token) accessTokenRef.current = d.access_token;
           toast.success("OTP sent to your phone.");
           setResendIn(30);
           resolve();
@@ -157,6 +163,7 @@ function Invite() {
           resolve();
         },
       );
+
     });
     setBusy(false);
   };
@@ -190,13 +197,15 @@ function Invite() {
         window.verifyOtp!(
           code,
           (d) => {
-            const t = extractToken(d) || accessTokenRef.current;
-            if (!t) return reject(new Error("No access token returned."));
+            const t = (typeof d === "object" && d?.access_token) || extractToken(d) || accessTokenRef.current;
+            if (!t || t.length < 10) return reject(new Error("No access token returned."));
             resolve(t);
           },
           (e2) => reject(new Error(typeof e2 === "string" ? e2 : (e2?.message ?? "Invalid OTP."))),
+          reqIdRef.current || undefined,
         );
       });
+
 
       await acceptFn({
         data: {
@@ -227,7 +236,7 @@ function Invite() {
 
   const resend = async () => {
     if (resendIn > 0) return;
-    if (!window.retryOtp) return sendOtp();
+    if (!window.retryOtp || !reqIdRef.current) return sendOtp();
     setBusy(true);
     await new Promise<void>((resolve) => {
       window.retryOtp!(
@@ -238,7 +247,9 @@ function Invite() {
           toast.error(msg);
           resolve();
         },
+        reqIdRef.current,
       );
+
     });
     setBusy(false);
   };
