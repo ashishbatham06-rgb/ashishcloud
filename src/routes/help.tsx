@@ -16,13 +16,13 @@ export const Route = createFileRoute("/help")({
 });
 
 const faqs = [
-  { q: "How do I get an account?", a: "Accounts are invite-only. Email ashish01raikwar@gmail.com and the admin will send a one-time signup link to your inbox." },
-  { q: "What's the upload limit?", a: "Each file can be up to 1 GB. Each user has a configurable storage quota (default 5 GB) that the admin can raise or lower." },
-  { q: "How do shares work?", a: "Generate a link from any file. Add a password, an expiry, or a maximum download count. Visitors hit /api/public/s/<token> — we validate every request before redirecting them to a short-lived presigned R2 URL." },
-  { q: "Is my data encrypted?", a: "All transfers use TLS. Files live in your Cloudflare R2 bucket. Auth, OTPs, and share-link passwords are bcrypt-hashed; access is gated by Postgres row-level security on every table." },
-  { q: "What does admin login look like?", a: "Admin sign-in requires email + password AND a 6-digit code sent to the admin's registered email. Codes expire in 10 minutes and are invalidated after 5 wrong attempts." },
-  { q: "Can I delete a file forever?", a: "Yes. Deletes mark the row first (recoverable for 30 days), then the R2 object is removed and quota is freed." },
-  { q: "How is billing calculated?", a: "The admin dashboard reads live counters (storage GB, Class A/B ops) and applies Cloudflare R2 pricing — only the amount over the included tier is charged: $0.015/GB-mo, $4.50/M Class A, $0.36/M Class B." },
+  { q: "How do I get an account?", a: "Free accounts are open — sign up directly from the login page. For Plan B or custom plans, email ashishcloudservices@gmail.com." },
+  { q: "What's the upload limit?", a: "Each file can be up to 1 GB. Storage quota depends on your plan: 1 GB on Free, 5 GB on Plan B, custom on Enterprise." },
+  { q: "How do shares work?", a: "Generate a link from any file. Add a password, expiry, or maximum download count. Every visitor goes through a validation step before getting a short-lived download URL." },
+  { q: "Is my data encrypted?", a: "All transfers use TLS. Storage is encrypted at rest. Passwords and OTPs are hashed; row-level access control gates every query." },
+  { q: "How does sign-in work?", a: "First-time signup requires email + password + an 8-digit SMS OTP to verify your number. After that, the same device logs in with just email + password. A new device triggers another OTP for safety." },
+  { q: "Can I delete a file forever?", a: "Yes. Deletes mark the row first (recoverable for 30 days), then the object is permanently removed and your quota is freed." },
+  { q: "What about egress fees?", a: "Zero. Downloads are free, on every plan, always." },
 ];
 
 function Help() {

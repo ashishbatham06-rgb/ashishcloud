@@ -58,11 +58,13 @@ function useMsg91(widgetId: string, tokenAuth: string, enabled: boolean) {
           widgetId,
           tokenAuth,
           exposeMethods: true,
+          otpLength: 8,
           success: () => null,
           failure: () => null,
         });
         window.__msg91Booted = true;
       }
+
       // Methods are attached shortly after init.
       const poll = setInterval(() => {
         if (window.sendOtp && window.verifyOtp) {
@@ -188,7 +190,7 @@ function Invite() {
   const verifyAndCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!info) return;
-    if (code.length !== 4 && code.length !== 6) return toast.error("Enter the OTP code.");
+    if (code.length !== 8) return toast.error("Enter the 8-digit OTP.");
     if (!window.verifyOtp) return toast.error("OTP service not ready.");
 
     setBusy(true);
@@ -322,9 +324,9 @@ function Invite() {
                     <span className="font-medium">{normalisedPhone}</span>
                   </div>
                   <div className="flex justify-center">
-                    <InputOTP maxLength={6} value={code} onChange={setCode}>
+                    <InputOTP maxLength={8} value={code} onChange={setCode}>
                       <InputOTPGroup>
-                        {[0,1,2,3,4,5].map((i) => <InputOTPSlot key={i} index={i} />)}
+                        {[0,1,2,3,4,5,6,7].map((i) => <InputOTPSlot key={i} index={i} />)}
                       </InputOTPGroup>
                     </InputOTP>
                   </div>
@@ -333,7 +335,7 @@ function Invite() {
                       <Loader2 className="size-3 animate-spin" /> Loading secure OTP service…
                     </p>
                   )}
-                  <Button type="submit" className="w-full" disabled={busy || code.length < 4}>
+                  <Button type="submit" className="w-full" disabled={busy || code.length < 8}>
                     {busy && <Loader2 className="size-4 mr-2 animate-spin" />}
                     Verify & create account
                   </Button>

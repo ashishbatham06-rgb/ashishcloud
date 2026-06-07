@@ -76,6 +76,7 @@ function useMsg91(widgetId: string, tokenAuth: string, enabled: boolean) {
           widgetId,
           tokenAuth,
           exposeMethods: true,
+          otpLength: 8,
           success: () => null,
           failure: () => null,
         });
@@ -218,7 +219,7 @@ function Login() {
   const submitOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!window.verifyOtp) return toast.error("OTP service not ready.");
-    if (code.length !== 4 && code.length !== 6) return toast.error("Enter the OTP.");
+    if (code.length !== 8) return toast.error("Enter the 8-digit OTP.");
     setBusy(true);
     try {
       const accessToken: string = await new Promise((resolve, reject) => {
@@ -322,9 +323,9 @@ function Login() {
                 <span className="font-medium">{maskedPhone}</span>
               </div>
               <div className="flex justify-center">
-                <InputOTP maxLength={6} value={code} onChange={setCode}>
+                <InputOTP maxLength={8} value={code} onChange={setCode}>
                   <InputOTPGroup>
-                    {[0,1,2,3,4,5].map((i) => <InputOTPSlot key={i} index={i} />)}
+                    {[0,1,2,3,4,5,6,7].map((i) => <InputOTPSlot key={i} index={i} />)}
                   </InputOTPGroup>
                 </InputOTP>
               </div>
@@ -333,7 +334,7 @@ function Login() {
                   <Loader2 className="size-3 animate-spin" /> Loading secure OTP service…
                 </p>
               )}
-              <Button type="submit" className="w-full" disabled={busy || code.length < 4}>
+              <Button type="submit" className="w-full" disabled={busy || code.length < 8}>
                 {busy && <Loader2 className="size-4 mr-2 animate-spin" />}Verify & continue
               </Button>
               <div className="flex items-center justify-between text-xs">

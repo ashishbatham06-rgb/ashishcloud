@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as FeaturesRouteImport } from './routes/features'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -28,11 +27,6 @@ import { Route as ApiPublicSTokenRouteImport } from './routes/api/public/s.$toke
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HowItWorksRoute = HowItWorksRouteImport.update({
-  id: '/how-it-works',
-  path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HelpRoute = HelpRouteImport.update({
@@ -105,7 +99,6 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/features': typeof FeaturesRoute
   '/help': typeof HelpRoute
-  '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -121,7 +114,6 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/features': typeof FeaturesRoute
   '/help': typeof HelpRoute
-  '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -139,7 +131,6 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/features': typeof FeaturesRoute
   '/help': typeof HelpRoute
-  '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -157,7 +148,6 @@ export interface FileRouteTypes {
     | '/contact'
     | '/features'
     | '/help'
-    | '/how-it-works'
     | '/login'
     | '/admin'
     | '/dashboard'
@@ -173,7 +163,6 @@ export interface FileRouteTypes {
     | '/contact'
     | '/features'
     | '/help'
-    | '/how-it-works'
     | '/login'
     | '/admin'
     | '/dashboard'
@@ -190,7 +179,6 @@ export interface FileRouteTypes {
     | '/contact'
     | '/features'
     | '/help'
-    | '/how-it-works'
     | '/login'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
@@ -208,7 +196,6 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   FeaturesRoute: typeof FeaturesRoute
   HelpRoute: typeof HelpRoute
-  HowItWorksRoute: typeof HowItWorksRoute
   LoginRoute: typeof LoginRoute
   ApiUploadRoute: typeof ApiUploadRoute
   InviteTokenRoute: typeof InviteTokenRoute
@@ -225,13 +212,6 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/how-it-works': {
-      id: '/how-it-works'
-      path: '/how-it-works'
-      fullPath: '/how-it-works'
-      preLoaderRoute: typeof HowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/help': {
@@ -347,7 +327,6 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   FeaturesRoute: FeaturesRoute,
   HelpRoute: HelpRoute,
-  HowItWorksRoute: HowItWorksRoute,
   LoginRoute: LoginRoute,
   ApiUploadRoute: ApiUploadRoute,
   InviteTokenRoute: InviteTokenRoute,
@@ -359,3 +338,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
