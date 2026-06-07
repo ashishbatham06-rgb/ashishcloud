@@ -8,21 +8,21 @@ export const Route = createFileRoute("/features")({
   head: () => ({
     meta: [
       { title: "Features — Ashish Cloud" },
-      { name: "description", content: "Everything Ashish Cloud does: bulk upload/download, signed share links, admin controls, live billing." },
+      { name: "description", content: "Bulk upload, signed share links, admin controls — your private cloud, refined." },
     ],
   }),
   component: Features,
 });
 
 const items = [
-  { icon: Upload, title: "Bulk drag-and-drop upload", desc: "Drop files or whole folders. Quality picker (Original/High/Medium). Resumable presigned PUTs straight to R2." },
-  { icon: Download, title: "Multi-select downloads", desc: "Select many files, download each as a clean, presigned URL — no proxying through our servers." },
-  { icon: Share2, title: "Smart share links", desc: "Optional password (bcrypt-hashed), expiry, and download cap. Revoke anytime; usage tracked." },
+  { icon: Upload, title: "Bulk drag-and-drop upload", desc: "Drop files or whole folders. Parallel transfers stream directly to storage at full line speed." },
+  { icon: Download, title: "Multi-select downloads", desc: "Grab many files at once. Each download streams direct from the edge — no proxy hops." },
+  { icon: Share2, title: "Smart share links", desc: "Optional password, expiry, and download cap. Revoke anytime; usage tracked per link." },
   { icon: ImageIcon, title: "Media previews", desc: "Inline image, video, and PDF previews in a clean lightbox." },
-  { icon: Trash2, title: "Trash with restore", desc: "Soft delete first. Restore within 30 days before objects are permanently removed from R2." },
-  { icon: Users, title: "User management", desc: "Admin invites by email. Adjust quota, disable, or delete users in one click." },
-  { icon: Receipt, title: "Live R2 billing", desc: "Admin dashboard shows storage, Class A & B ops, and live overage cost based on Cloudflare R2 pricing." },
-  { icon: Shield, title: "Audit log", desc: "Every login, upload, download, share, and admin action is recorded with IP and user agent." },
+  { icon: Trash2, title: "Trash with restore", desc: "Soft delete first. Restore within 30 days before objects are permanently removed." },
+  { icon: Users, title: "User management", desc: "Admin invites by email. Adjust quota, disable, or remove users in one click." },
+  { icon: Receipt, title: "Live usage dashboard", desc: "Per-user storage, bandwidth and activity — at a glance." },
+  { icon: Shield, title: "Audit log", desc: "Every login, upload, download, share, and admin action is recorded." },
 ];
 
 function Features() {

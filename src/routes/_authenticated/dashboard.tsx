@@ -115,14 +115,13 @@ function Dashboard() {
     setUploading(true);
     setProgress({ done: 0, total: files.length });
     let okCount = 0;
-    for (const file of files) {
+
+    const uploadOne = async (file: File) => {
       try {
         const mime = file.type || "application/octet-stream";
-        // 1) Get presigned PUT URL from our server
         const { uploadUrl, key } = await presignFn({
           data: { name: file.name, size: file.size, mime, quality },
         });
-        // 2) Upload directly to R2 via XHR (streams without buffering in worker memory)
         await new Promise<void>((resolve, reject) => {
           const xhr = new XMLHttpRequest();
           xhr.open("PUT", uploadUrl, true);
@@ -130,11 +129,10 @@ function Dashboard() {
           xhr.onload = () =>
             xhr.status >= 200 && xhr.status < 300
               ? resolve()
-              : reject(new Error(`R2 upload failed: ${xhr.status}`));
+              : reject(new Error(`Upload failed: ${xhr.status}`));
           xhr.onerror = () => reject(new Error("Network error during upload"));
           xhr.send(file);
         });
-        // 3) Confirm in DB
         await confirmFn({
           data: { key, name: file.name, size: file.size, mime, quality, folder: activeFolder },
         });
@@ -144,13 +142,27 @@ function Dashboard() {
       } finally {
         setProgress((p) => (p ? { ...p, done: p.done + 1 } : p));
       }
-    }
+    };
+
+    // Parallel transfers — up to 6 files in flight at once for line-speed throughput
+    const CONCURRENCY = 6;
+    const queue = files.slice();
+    const workers = Array.from({ length: Math.min(CONCURRENCY, queue.length) }, async () => {
+      while (queue.length) {
+        const file = queue.shift();
+        if (!file) break;
+        await uploadOne(file);
+      }
+    });
+    await Promise.all(workers);
+
     setUploading(false);
     setProgress(null);
     if (okCount) toast.success(`Uploaded ${okCount} file${okCount > 1 ? "s" : ""}.`);
     qc.invalidateQueries({ queryKey: ["files"] });
     qc.invalidateQueries({ queryKey: ["me"] });
   }, [quality, qc, activeFolder, presignFn, confirmFn]);
+
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
