@@ -1,104 +1,59 @@
+# Plan — OTP fix + Invisly-style redesign + pricing/perf updates
 
-# Ashish Cloud — Full Plan
+Big batch of changes. I'll ship them all in one pass.
 
-A minimalist, professional light/dark cloud storage platform built on TanStack Start + Lovable Cloud (auth/DB) + Cloudflare R2 (object storage) + Lovable Email (OTP & invites).
+## 1. OTP: 6 → 8 digits
+- Login + invite pages: change OTP input length to 8 (MSG91 widget config + any local validators).
+- Anywhere `length={6}` / `maxLength: 6` for OTP → `8`.
 
-## 1. Tech & Security Stack
+## 2. Brand & messaging cleanup (remove backend mentions)
+- Remove all "Cloudflare R2", "Supabase", "S3-compatible" copy from landing, features, footer, how-it-works, help, contact.
+- Replace with neutral lines: "ultra-fast global storage", "zero-egress network", "private edge cloud".
+- Delete the **How it works** route + nav link entirely.
+- Trim landing sections that leak infra detail.
 
-- **Frontend**: TanStack Start, Tailwind v4, shadcn/ui, glass + modern card styling, smooth motion.
-- **Auth/DB**: Lovable Cloud (Supabase) — RLS on every table, `user_roles` table with `app_role` enum + `has_role()` security-definer function (no role on profiles).
-- **Storage**: Cloudflare R2 via AWS SDK v3 (S3-compatible) in server functions only. Presigned URLs for uploads/downloads (never expose R2 keys).
-- **Email**: Lovable Email for admin OTP + invite links.
-- **Security layers**:
-  - RLS + role checks server-side on every server fn
-  - Admin login = email + password + 6-digit email OTP (15-min expiry, rate-limited, hashed in DB)
-  - Password hashing handled by Supabase Auth; HIBP leaked-password check enabled
-  - Invite-only signup (signed, single-use, expiring tokens)
-  - Per-user storage quota enforced server-side before presign
-  - File type sniff + size cap (1 GB/file) server-side
-  - Share links: signed tokens with optional expiry + password + download cap
-  - Audit log table (login, upload, download, share, admin actions)
-  - Rate limiting on auth + share endpoints
-  - CSRF-safe server fns, httpOnly secure cookies, strict CSP headers
-  - "Remember me" via long-lived refresh token (opt-in checkbox)
+## 3. New pricing (replaces current pricing band)
+| Plan | Storage | Price | Egress | How to get |
+|------|---------|-------|--------|------------|
+| Free | 1 GB | ₹0 | Free | Self sign-up |
+| Plan B | 5 GB | ₹30 / month | Free | Email request |
+| Custom / Enterprise | Any | Custom | Free | Email request |
 
-## 2. Database (Lovable Cloud)
+Contact email everywhere: **ashishcloudservices@gmail.com**.
+Free users can sign up themselves; Plan B and Custom show "Request access" → mailto link.
 
-Tables (all RLS-enabled, with explicit GRANTs):
-- `profiles` (id → auth.users, display_name, avatar_url, storage_quota_bytes default 5 GB, storage_used_bytes, disabled bool)
-- `user_roles` (user_id, role: 'admin' | 'user')
-- `files` (id, owner_id, r2_key, name, size, mime, quality, folder, created_at)
-- `share_links` (id, file_id, token_hash, expires_at, password_hash, max_downloads, downloads)
-- `invites` (id, email, token_hash, role, quota_bytes, expires_at, used_at, created_by)
-- `admin_otps` (user_id, code_hash, expires_at, attempts)
-- `audit_log` (id, actor_id, action, target, meta jsonb, ip, ua, created_at)
-- `billing_state` (single row: gb_month_used, class_a_ops, class_b_ops, period_start)
+## 4. Invisly-style 3D redesign (landing page)
+Reference: invisly.in — dark, glassy, big gradient orb / 3D blob hero, large display type, soft glow grid, sticky glass header, magnetic CTAs, scroll-reveal cards.
 
-## 3. Pages
+Implementation (no heavy 3D libs — keep bundle small):
+- Animated CSS gradient mesh + radial glow orbs (blur-3xl) as hero backdrop.
+- Conic-gradient rotating ring behind headline.
+- Floating glass cards with subtle parallax on scroll (CSS transforms).
+- Refreshed tokens in `src/styles.css`: deeper near-black bg, vivid violet→cyan gradient, neon accent, soft shadow-glow.
+- Bigger display font (already have Inter Display via tokens — bump size + tracking).
+- Section reveal: `animate-fade-in` on intersection.
+- Sticky translucent header with backdrop-blur.
 
-1. **Landing** (`/`) — hero, value props, how-it-works strip, pricing band, CTA "Request access".
-2. **Features** (`/features`) — bulk upload/download, share links, quality selection, admin controls.
-3. **How It Works** (`/how-it-works`) — step-by-step + diagrams.
-4. **Help Center** (`/help`) — accordion FAQ + usage guide.
-5. **Contact** (`/contact`) — shows ashish01raikwar@gmail.com + contact form (rate-limited).
-6. **Login** (`/login`) — gmail+password; if admin → OTP step; "Remember me" checkbox.
-7. **Invite accept** (`/invite/$token`) — set password, lands in dashboard.
-8. **User Dashboard** (`/_authenticated/dashboard`)
-   - Quota ring (used / total), drag-drop bulk uploader with quality picker (Original / High / Medium), folders, multi-select, bulk download (zip via server stream), per-file share button, preview grid for images/videos.
-9. **Admin Dashboard** (`/_authenticated/admin`) — gated by `has_role('admin')`
-   - **Users**: list with storage used, disable/enable, delete, edit quota, generate invite link (copy to clipboard), set role.
-   - **Files**: global file browser, force-delete.
-   - **Billing**: live R2 usage card with calculation:
-     - Storage: `max(0, gb_month - 10) * $0.015`
-     - Class A: `max(0, ops_a - 1_000_000) / 1_000_000 * $4.50`
-     - Class B: `max(0, ops_b - 10_000_000) / 1_000_000 * $0.36`
-     - Total estimated monthly bill, shown live, with breakdown table.
-   - **Audit log** viewer with filters.
+Scope: landing (`/`), header, footer. Other app pages (dashboard/admin) untouched.
 
-## 4. R2 Integration (server-only)
+## 5. Upload/download speed
+- Remove artificial concurrency caps in upload flow; parallelize presign + PUT (up to 6 concurrent parts/files).
+- Use `fetch` with streaming where supported; drop any throttling.
+- For downloads, presigned URL already streams directly from edge — ensure no proxy step; confirm `presignDownload` returns direct URL (it does).
+- Bump multipart threshold / concurrency in client uploader.
 
-- `src/lib/r2.server.ts`: S3 client using `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`.
-- Server fns:
-  - `presignUpload({ name, size, mime, quality })` — quota check → PUT presign + Class A op counter++
-  - `presignDownload({ fileId })` — ownership/share check → GET presign + Class B op counter++
-  - `bulkZipDownload({ fileIds })` — streams ZIP via server route at `/api/download/zip`
-  - `createShareLink`, `revokeShareLink`
-  - `adminListUsers`, `adminSetQuota`, `adminDisableUser`, `adminDeleteUser`, `adminCreateInvite`
-- Public share resolver at `/s/$token` (server route) — validates token, optional password, increments downloads, presigns GET.
+## 6. Misc polish
+- Update site meta/title to drop backend references.
+- robots.txt unchanged.
+- Keep all auth/device-trust logic working as-is.
 
-## 5. Secrets You Will Provide
+## Files touched (approx)
+- `src/styles.css` — new tokens, gradient utilities
+- `src/routes/index.tsx` — full landing redesign
+- `src/components/site-header.tsx`, `site-footer.tsx` — glass + nav cleanup
+- `src/routes/login.tsx`, `src/routes/invite.$token.tsx` — OTP length 8
+- `src/routes/how-it-works.tsx` — delete
+- `src/routes/features.tsx`, `help.tsx`, `contact.tsx` — copy cleanup, new email
+- Upload component (find under dashboard) — concurrency bump
 
-After you approve, I'll request via secrets form:
-- `R2_ACCOUNT_ID`
-- `R2_ACCESS_KEY_ID`
-- `R2_SECRET_ACCESS_KEY`
-- `R2_BUCKET` (bucket name)
-- `R2_PUBLIC_HOST` (optional custom domain; else use S3 endpoint)
-- `ADMIN_SEED_EMAIL` + `ADMIN_SEED_PASSWORD` (used once to seed first admin, then auto-purged)
-
-Lovable Email domain setup will be triggered during build (one-time DNS step at your registrar).
-
-## 6. Build Order
-
-1. Enable Lovable Cloud + Email domain setup dialog.
-2. Migrations: enum, tables, RLS, grants, `has_role`, triggers (profile auto-create, storage usage updater).
-3. Design system tokens (light/dark, glass, minimal) in `src/styles.css`.
-4. Public pages (Landing, Features, How It Works, Help, Contact).
-5. Auth flow: login, OTP step, invite accept, remember-me.
-6. R2 server functions + presign endpoints + zip stream route.
-7. User dashboard (upload/download/share).
-8. Admin dashboard (users, billing, audit).
-9. Audit log + rate limiting middleware.
-10. Seed first admin, smoke-test end-to-end, then ask you for R2 keys.
-
-## 7. Extra Features I'll Add (the "1–2 extras")
-
-- **Trash / 30-day soft delete** with restore.
-- **Per-file preview** (image lightbox, video player, PDF inline).
-
-## Open Items Before Build
-
-- Email domain: I'll trigger the Lovable Email setup dialog — you'll add 2 NS records at your domain registrar (or we can use Lovable's default sender for now and switch later).
-- R2 keys: I'll request them via a secure secrets form after the scaffold is ready.
-
-Approve and I'll start building.
+Confirm and I'll build it all in one go.
