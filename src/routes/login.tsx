@@ -312,7 +312,7 @@ function Login() {
                 {busy && <Loader2 className="size-4 mr-2 animate-spin" />}Sign in
               </Button>
               <p className="text-xs text-muted-foreground text-center">
-                No account? Invitations are sent by the admin.
+                No account? <a href="/signup" className="text-primary hover:underline">Sign up free</a> — 1 GB, no card.
               </p>
             </form>
           ) : (

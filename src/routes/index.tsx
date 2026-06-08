@@ -35,12 +35,13 @@ function Landing() {
             <div className="absolute bottom-0 left-1/3 size-[420px] rounded-full bg-primary/20 blur-[120px] animate-orb" />
           </div>
 
-          <div className="mx-auto max-w-6xl px-4 pt-24 pb-28 text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border bg-card/60 px-3 py-1 text-xs text-muted-foreground glass shadow-soft">
+          <div className="mx-auto max-w-6xl px-4 pt-24 pb-28 text-center relative">
+            <div aria-hidden className="pointer-events-none absolute left-1/2 top-32 -translate-x-1/2 size-[640px] ring-conic animate-spin-slow opacity-60" />
+            <div className="relative inline-flex items-center gap-2 rounded-full border bg-card/60 px-3 py-1 text-xs text-muted-foreground glass shadow-soft animate-float">
               <Sparkles className="size-3" /> Private. Fast. Yours.
             </div>
 
-            <h1 className="mt-8 font-display text-5xl sm:text-7xl font-semibold tracking-tight leading-[1.05]">
+            <h1 className="relative mt-8 font-display text-5xl sm:text-7xl font-semibold tracking-tight leading-[1.05] animate-tilt-in">
               Your cloud,
               <br />
               <span className="text-gradient">rebuilt for speed.</span>
@@ -53,7 +54,7 @@ function Landing() {
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <Button asChild size="lg" className="shadow-glow">
-                <Link to="/login">
+                <Link to="/signup">
                   Start free <ArrowRight className="ml-1 size-4" />
                 </Link>
               </Button>
@@ -101,7 +102,7 @@ function Landing() {
               { icon: Users, title: "Per-user quotas", desc: "Each user gets a private workspace. Admin sets limits instantly." },
               { icon: KeyRound, title: "Encrypted secrets", desc: "Hashed passwords and OTPs. Row-level access on every query." },
             ].map((f) => (
-              <Card key={f.title} className="p-6 glass shadow-soft hover-scale">
+              <Card key={f.title} className="p-6 glass shadow-soft tilt-3d">
                 <f.icon className="size-5 text-primary" />
                 <h3 className="mt-3 font-semibold">{f.title}</h3>
                 <p className="mt-1.5 text-sm text-muted-foreground">{f.desc}</p>
@@ -123,7 +124,7 @@ function Landing() {
               price="₹0"
               period="forever"
               storage="1 GB"
-              cta={<Button asChild className="w-full"><Link to="/login">Sign up free</Link></Button>}
+              cta={<Button asChild className="w-full"><Link to="/signup">Sign up free</Link></Button>}
               features={["1 GB storage", "Free downloads (zero egress)", "Signed share links", "8-digit OTP security"]}
             />
             <PricingCard
@@ -187,7 +188,7 @@ function Landing() {
             <p className="relative mt-3 text-muted-foreground">Sign up free in 60 seconds. No card. No nonsense.</p>
             <div className="relative mt-6">
               <Button asChild size="lg" className="shadow-glow">
-                <Link to="/login">Start free <ArrowRight className="ml-1 size-4" /></Link>
+                <Link to="/signup">Start free <ArrowRight className="ml-1 size-4" /></Link>
               </Button>
             </div>
           </Card>

@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as FeaturesRouteImport } from './routes/features'
@@ -24,6 +25,11 @@ import { Route as ApiPublicUserExistsRouteImport } from './routes/api/public/use
 import { Route as ApiPublicSeedAdminRouteImport } from './routes/api/public/seed-admin'
 import { Route as ApiPublicSTokenRouteImport } from './routes/api/public/s.$token'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/features': typeof FeaturesRoute
   '/help': typeof HelpRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/api/upload': typeof ApiUploadRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/features': typeof FeaturesRoute
   '/help': typeof HelpRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/api/upload': typeof ApiUploadRoute
@@ -132,6 +140,7 @@ export interface FileRoutesById {
   '/features': typeof FeaturesRoute
   '/help': typeof HelpRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/api/upload': typeof ApiUploadRoute
@@ -149,6 +158,7 @@ export interface FileRouteTypes {
     | '/features'
     | '/help'
     | '/login'
+    | '/signup'
     | '/admin'
     | '/dashboard'
     | '/api/upload'
@@ -164,6 +174,7 @@ export interface FileRouteTypes {
     | '/features'
     | '/help'
     | '/login'
+    | '/signup'
     | '/admin'
     | '/dashboard'
     | '/api/upload'
@@ -180,6 +191,7 @@ export interface FileRouteTypes {
     | '/features'
     | '/help'
     | '/login'
+    | '/signup'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/api/upload'
@@ -197,6 +209,7 @@ export interface RootRouteChildren {
   FeaturesRoute: typeof FeaturesRoute
   HelpRoute: typeof HelpRoute
   LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
   ApiUploadRoute: typeof ApiUploadRoute
   InviteTokenRoute: typeof InviteTokenRoute
   STokenRoute: typeof STokenRoute
@@ -207,6 +220,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -328,6 +348,7 @@ const rootRouteChildren: RootRouteChildren = {
   FeaturesRoute: FeaturesRoute,
   HelpRoute: HelpRoute,
   LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
   ApiUploadRoute: ApiUploadRoute,
   InviteTokenRoute: InviteTokenRoute,
   STokenRoute: STokenRoute,
