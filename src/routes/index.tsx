@@ -102,7 +102,7 @@ function Landing() {
               { icon: Users, title: "Per-user quotas", desc: "Each user gets a private workspace. Admin sets limits instantly." },
               { icon: KeyRound, title: "Encrypted secrets", desc: "Hashed passwords and OTPs. Row-level access on every query." },
             ].map((f) => (
-              <Card key={f.title} className="p-6 glass shadow-soft hover-scale">
+              <Card key={f.title} className="p-6 glass shadow-soft tilt-3d">
                 <f.icon className="size-5 text-primary" />
                 <h3 className="mt-3 font-semibold">{f.title}</h3>
                 <p className="mt-1.5 text-sm text-muted-foreground">{f.desc}</p>
