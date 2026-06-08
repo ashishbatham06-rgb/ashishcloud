@@ -187,7 +187,7 @@ function Landing() {
             <p className="relative mt-3 text-muted-foreground">Sign up free in 60 seconds. No card. No nonsense.</p>
             <div className="relative mt-6">
               <Button asChild size="lg" className="shadow-glow">
-                <Link to="/login">Start free <ArrowRight className="ml-1 size-4" /></Link>
+                <Link to="/signup">Start free <ArrowRight className="ml-1 size-4" /></Link>
               </Button>
             </div>
           </Card>
