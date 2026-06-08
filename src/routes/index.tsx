@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { CloudScene } from "@/components/cloud-scene";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -27,13 +28,9 @@ function Landing() {
       <main className="flex-1">
         {/* ========== HERO ========== */}
         <section className="relative overflow-hidden">
-          {/* Animated backdrop */}
-          <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-            <div className="absolute inset-0 bg-grid" />
-            <div className="absolute -top-32 -left-32 size-[480px] rounded-full bg-primary/30 blur-[120px] animate-orb" />
-            <div className="absolute top-20 -right-32 size-[520px] rounded-full bg-primary-glow/30 blur-[120px] animate-orb-2" />
-            <div className="absolute bottom-0 left-1/3 size-[420px] rounded-full bg-primary/20 blur-[120px] animate-orb" />
-          </div>
+          {/* Animated luxury cloud backdrop */}
+          <CloudScene />
+
 
           <div className="mx-auto max-w-6xl px-4 pt-24 pb-28 text-center relative">
             <div aria-hidden className="pointer-events-none absolute left-1/2 top-32 -translate-x-1/2 size-[640px] ring-conic animate-spin-slow opacity-60" />

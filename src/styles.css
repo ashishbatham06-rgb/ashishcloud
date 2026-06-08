@@ -237,3 +237,72 @@
   background-size: 60px 60px;
   mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
 }
+
+/* ============ LUXURY CLOUD SCENE ============ */
+@keyframes cloud-drift-x {
+  0%   { transform: translate3d(-15%, 0, 0) scale(1); opacity: 0; }
+  10%  { opacity: 1; }
+  50%  { transform: translate3d(20%, -6%, 0) scale(1.05); opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translate3d(55%, 0, 0) scale(1); opacity: 0; }
+}
+@keyframes aurora-pan {
+  0%, 100% { background-position: 0% 50%, 100% 50%, 50% 0%; }
+  50%      { background-position: 100% 50%, 0% 50%, 50% 100%; }
+}
+@keyframes particle-rise {
+  0%   { transform: translate3d(0, 110%, 0) scale(0.6); opacity: 0; }
+  10%  { opacity: 0.8; }
+  90%  { opacity: 0.8; }
+  100% { transform: translate3d(20px, -20%, 0) scale(1.1); opacity: 0; }
+}
+
+.cloud-scene { perspective: 1200px; }
+
+.cloud-aurora {
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 30%, color-mix(in oklab, var(--primary) 35%, transparent), transparent 60%),
+    radial-gradient(ellipse 55% 45% at 80% 60%, color-mix(in oklab, var(--primary-glow) 35%, transparent), transparent 60%),
+    radial-gradient(ellipse 70% 40% at 50% 100%, color-mix(in oklab, var(--primary) 22%, transparent), transparent 65%);
+  background-size: 200% 200%, 200% 200%, 200% 200%;
+  animation: aurora-pan 22s ease-in-out infinite;
+  filter: blur(20px) saturate(140%);
+}
+
+.cloud-drift {
+  position: absolute;
+  width: 70vw;
+  max-width: 900px;
+  height: auto;
+  filter: blur(8px) saturate(120%);
+  will-change: transform, opacity;
+  mix-blend-mode: screen;
+}
+.cloud-drift-1 { top: 8%;  left: 0; animation: cloud-drift-x 38s ease-in-out infinite; }
+.cloud-drift-2 { top: 38%; left: 0; animation: cloud-drift-x 52s ease-in-out infinite; animation-delay: -10s; opacity: 0.9; }
+.cloud-drift-3 { top: 62%; left: 0; animation: cloud-drift-x 64s ease-in-out infinite; animation-delay: -28s; opacity: 0.8; }
+
+.particles {
+  position: absolute; inset: 0;
+}
+.particles span {
+  position: absolute;
+  left: calc((var(--i) * 53%) - (var(--i) * 47%));
+  bottom: -10%;
+  width: 6px; height: 6px;
+  border-radius: 999px;
+  background: radial-gradient(circle, color-mix(in oklab, var(--primary-glow) 80%, white), transparent 70%);
+  filter: blur(1px);
+  animation: particle-rise calc(14s + (var(--i) * 0.8s)) linear infinite;
+  animation-delay: calc(var(--i) * -1.3s);
+}
+
+.cloud-vignette {
+  background:
+    radial-gradient(ellipse at center, transparent 55%, color-mix(in oklab, var(--background) 85%, transparent) 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cloud-aurora, .cloud-drift, .particles span { animation: none !important; }
+}
+
