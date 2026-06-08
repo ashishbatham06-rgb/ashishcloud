@@ -35,12 +35,13 @@ function Landing() {
             <div className="absolute bottom-0 left-1/3 size-[420px] rounded-full bg-primary/20 blur-[120px] animate-orb" />
           </div>
 
-          <div className="mx-auto max-w-6xl px-4 pt-24 pb-28 text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border bg-card/60 px-3 py-1 text-xs text-muted-foreground glass shadow-soft">
+          <div className="mx-auto max-w-6xl px-4 pt-24 pb-28 text-center relative">
+            <div aria-hidden className="pointer-events-none absolute left-1/2 top-32 -translate-x-1/2 size-[640px] ring-conic animate-spin-slow opacity-60" />
+            <div className="relative inline-flex items-center gap-2 rounded-full border bg-card/60 px-3 py-1 text-xs text-muted-foreground glass shadow-soft animate-float">
               <Sparkles className="size-3" /> Private. Fast. Yours.
             </div>
 
-            <h1 className="mt-8 font-display text-5xl sm:text-7xl font-semibold tracking-tight leading-[1.05]">
+            <h1 className="relative mt-8 font-display text-5xl sm:text-7xl font-semibold tracking-tight leading-[1.05] animate-tilt-in">
               Your cloud,
               <br />
               <span className="text-gradient">rebuilt for speed.</span>
