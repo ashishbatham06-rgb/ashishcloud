@@ -116,26 +116,25 @@ function Dashboard() {
     setProgress({ done: 0, total: files.length });
     let okCount = 0;
 
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data: sess } = await supabase.auth.getSession();
+    const token = sess.session?.access_token ?? "";
+
     const uploadOne = async (file: File) => {
       try {
-        const mime = file.type || "application/octet-stream";
-        const { uploadUrl, key } = await presignFn({
-          data: { name: file.name, size: file.size, mime, quality },
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("quality", quality);
+        fd.append("folder", activeFolder);
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: fd,
         });
-        await new Promise<void>((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
-          xhr.open("PUT", uploadUrl, true);
-          xhr.setRequestHeader("Content-Type", mime);
-          xhr.onload = () =>
-            xhr.status >= 200 && xhr.status < 300
-              ? resolve()
-              : reject(new Error(`Upload failed: ${xhr.status}`));
-          xhr.onerror = () => reject(new Error("Network error during upload"));
-          xhr.send(file);
-        });
-        await confirmFn({
-          data: { key, name: file.name, size: file.size, mime, quality, folder: activeFolder },
-        });
+        if (!res.ok) {
+          const msg = await res.text().catch(() => `HTTP ${res.status}`);
+          throw new Error(msg || `Upload failed: ${res.status}`);
+        }
         okCount++;
       } catch (e: unknown) {
         toast.error(`${file.name}: ${e instanceof Error ? e.message : "failed"}`);
