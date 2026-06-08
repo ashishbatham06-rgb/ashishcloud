@@ -123,7 +123,7 @@ function Landing() {
               price="₹0"
               period="forever"
               storage="1 GB"
-              cta={<Button asChild className="w-full"><Link to="/login">Sign up free</Link></Button>}
+              cta={<Button asChild className="w-full"><Link to="/signup">Sign up free</Link></Button>}
               features={["1 GB storage", "Free downloads (zero egress)", "Signed share links", "8-digit OTP security"]}
             />
             <PricingCard
