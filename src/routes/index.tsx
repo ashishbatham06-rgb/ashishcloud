@@ -53,7 +53,7 @@ function Landing() {
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <Button asChild size="lg" className="shadow-glow">
-                <Link to="/login">
+                <Link to="/signup">
                   Start free <ArrowRight className="ml-1 size-4" />
                 </Link>
               </Button>
