@@ -166,16 +166,18 @@ export const deleteFolder = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const target = data.moveTo ?? "/";
-    await supabaseAdmin
+    const { error: fileMoveError } = await supabaseAdmin
       .from("files")
       .update({ folder: target })
       .eq("owner_id", context.userId)
       .eq("folder", data.name);
-    await supabaseAdmin
+    if (fileMoveError) throw new Error("Could not move the folder contents.");
+    const { error: folderDeleteError } = await supabaseAdmin
       .from("folders")
       .delete()
       .eq("owner_id", context.userId)
       .eq("name", data.name);
+    if (folderDeleteError) throw new Error("Could not delete the folder.");
     await logAudit({ actorId: context.userId, action: "folder.delete", meta: { name: data.name, moveTo: target } });
     return { ok: true };
   });

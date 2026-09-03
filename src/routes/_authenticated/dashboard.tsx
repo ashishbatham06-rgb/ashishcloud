@@ -212,11 +212,15 @@ function Dashboard() {
   const handleDeleteFolder = async (name: string) => {
     if (name === "/") return;
     if (!confirm(`Delete folder "${name}"? Files will be moved to "All files".`)) return;
-    await deleteFolderFn({ data: { name } });
-    toast.success("Folder deleted.");
-    if (activeFolder === name) setActiveFolder("/");
-    qc.invalidateQueries({ queryKey: ["folders"] });
-    qc.invalidateQueries({ queryKey: ["files"] });
+    try {
+      await deleteFolderFn({ data: { name } });
+      toast.success("Folder deleted.");
+      if (activeFolder === name) setActiveFolder("/");
+      qc.invalidateQueries({ queryKey: ["folders"] });
+      qc.invalidateQueries({ queryKey: ["files"] });
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Could not delete folder.");
+    }
   };
 
   const handleMoveTo = async (target: string) => {
@@ -271,20 +275,21 @@ function Dashboard() {
           {folderList.map((f) => {
             const active = activeFolder === f.name;
             return (
-              <button
-                key={f.name}
-                onClick={() => setActiveFolder(f.name)}
-                className={cn(
-                  "shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition-colors",
-                  active
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background hover:bg-accent border-border",
+              <div key={f.name} className={cn("shrink-0 inline-flex items-center rounded-full border", active ? "bg-primary text-primary-foreground border-primary" : "bg-background border-border")}>
+                <button
+                  onClick={() => setActiveFolder(f.name)}
+                  className="inline-flex items-center gap-1.5 rounded-l-full px-3 py-1.5 text-xs font-medium hover:bg-accent/60"
+                >
+                  {active ? <FolderOpen className="size-3.5" /> : <Folder className="size-3.5" />}
+                  {f.label}
+                  <span className={cn("text-[10px]", active ? "text-primary-foreground/80" : "text-muted-foreground")}>{f.count}</span>
+                </button>
+                {f.name !== "/" && (
+                  <Button size="icon" variant="ghost" className="h-7 w-7 rounded-full" onClick={() => handleDeleteFolder(f.name)} title={`Delete ${f.label}`}>
+                    <Trash2 className="size-3" />
+                  </Button>
                 )}
-              >
-                {active ? <FolderOpen className="size-3.5" /> : <Folder className="size-3.5" />}
-                {f.label}
-                <span className={cn("text-[10px]", active ? "text-primary-foreground/80" : "text-muted-foreground")}>{f.count}</span>
-              </button>
+              </div>
             );
           })}
           <button
