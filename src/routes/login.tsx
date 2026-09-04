@@ -211,7 +211,12 @@ function Login() {
         goNext(status.isAdmin);
         return;
       }
-      phoneRef.current = status.phone!;
+      const phone = status.phone;
+      if (!phone) {
+        goNext(status.isAdmin);
+        return;
+      }
+      phoneRef.current = phone;
       setMaskedPhone(status.maskedPhone);
       setStage("otp");
       // wait until widget is ready then auto-send
@@ -219,7 +224,7 @@ function Login() {
       while (!window.sendOtp && Date.now() - t0 < 8000) {
         await new Promise((r) => setTimeout(r, 150));
       }
-       await sendOtpToPhone(status.phone, reqIdRef);
+      await sendOtpToPhone(phone, reqIdRef);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Sign-in failed.";
       toast.error(msg);
