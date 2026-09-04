@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type MutableRefObject } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,20 +11,15 @@ import { SiteFooter } from "@/components/site-footer";
 import { supabase } from "@/integrations/supabase/client";
 import { checkDeviceTrust, trustDeviceWithOtp } from "@/lib/api/device.functions";
 import { getMsg91Config } from "@/lib/api/msg91.functions";
-import { completePasswordReset, startPasswordReset } from "@/lib/api/password-reset.functions";
 import { toast } from "sonner";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Loader2, ShieldCheck, ArrowLeft, Phone, KeyRound } from "lucide-react";
+import { Loader2, ShieldCheck, ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Log in — Ashish Cloud" },
       { name: "description", content: "Sign in to your Ashish Cloud account." },
-      { property: "og:title", content: "Log in — Ashish Cloud" },
-      { property: "og:description", content: "Sign in securely to your Ashish Cloud account." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Login,
@@ -117,15 +112,13 @@ function useMsg91(widgetId: string, tokenAuth: string, enabled: boolean) {
   return ready;
 }
 
-type Stage = "creds" | "otp" | "reset" | "reset-otp";
+type Stage = "creds" | "otp";
 
 function Login() {
   const navigate = useNavigate();
   const checkFn = useServerFn(checkDeviceTrust);
   const trustFn = useServerFn(trustDeviceWithOtp);
   const cfgFn = useServerFn(getMsg91Config);
-  const startResetFn = useServerFn(startPasswordReset);
-  const completeResetFn = useServerFn(completePasswordReset);
 
   const [stage, setStage] = useState<Stage>("creds");
   const [email, setEmail] = useState(
@@ -139,17 +132,11 @@ function Login() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [resendIn, setResendIn] = useState(0);
   const [cfg, setCfg] = useState<{ widgetId: string; tokenAuth: string } | null>(null);
-  const [resetPhone, setResetPhone] = useState("+91");
-  const [resetPassword, setResetPassword] = useState("");
-  const [resetCode, setResetCode] = useState("");
-  const [resetChallenge, setResetChallenge] = useState("");
-  const [resetMaskedPhone, setResetMaskedPhone] = useState("");
 
   const phoneRef = useRef<string>("");
   const reqIdRef = useRef<string>("");
-  const resetReqIdRef = useRef<string>("");
 
-  const ready = useMsg91(cfg?.widgetId ?? "", cfg?.tokenAuth ?? "", stage === "otp" || stage === "reset-otp");
+  const ready = useMsg91(cfg?.widgetId ?? "", cfg?.tokenAuth ?? "", stage === "otp");
 
   useEffect(() => {
     cfgFn().then(setCfg).catch(() => setCfg({ widgetId: "", tokenAuth: "" }));
@@ -164,7 +151,7 @@ function Login() {
   const goNext = (admin: boolean) =>
     navigate({ to: admin ? "/admin" : "/dashboard" });
 
-  const sendOtpToPhone = async (phone: string, requestIdRef: MutableRefObject<string>, label = "OTP sent to your phone.") => {
+  const sendOtpToPhone = async (phone: string) => {
     const digits = phone.replace(/[^\d+]/g, "");
     if (!window.sendOtp) {
       toast.error("OTP service still loading. Try again in a moment.");
@@ -175,9 +162,9 @@ function Login() {
         digits,
         (d) => {
           const reqId = extractString(d);
-           if (reqId) requestIdRef.current = reqId;
+          if (reqId) reqIdRef.current = reqId;
           setResendIn(30);
-           toast.success(label);
+          toast.success("OTP sent to your phone.");
           resolve(true);
         },
         (e) => {
@@ -211,12 +198,7 @@ function Login() {
         goNext(status.isAdmin);
         return;
       }
-      const phone = status.phone;
-      if (!phone) {
-        goNext(status.isAdmin);
-        return;
-      }
-      phoneRef.current = phone;
+      phoneRef.current = status.phone!;
       setMaskedPhone(status.maskedPhone);
       setStage("otp");
       // wait until widget is ready then auto-send
@@ -224,7 +206,7 @@ function Login() {
       while (!window.sendOtp && Date.now() - t0 < 8000) {
         await new Promise((r) => setTimeout(r, 150));
       }
-      await sendOtpToPhone(phone, reqIdRef);
+      await sendOtpToPhone(status.phone!);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Sign-in failed.";
       toast.error(msg);
@@ -249,7 +231,7 @@ function Login() {
             resolve(t);
           },
           (e2) => reject(new Error(typeof e2 === "string" ? e2 : (e2?.message ?? "Invalid OTP."))),
-           reqIdRef.current || undefined,
+          reqIdRef.current || undefined,
         );
       });
 
@@ -270,80 +252,6 @@ function Login() {
     }
   };
 
-  const submitResetRequest = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const phone = resetPhone.replace(/[^\d+]/g, "");
-    if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email.trim())) return toast.error("Enter the account email.");
-    if (phone.replace(/\D/g, "").length < 8) return toast.error("Enter the registered mobile number.");
-    setBusy(true);
-    try {
-      const result = await startResetFn({ data: { email, phone } });
-      if (!result.ok) {
-        toast.success("If the details match an account, you can continue with phone verification.");
-        return;
-      }
-      setResetChallenge(result.challengeToken);
-      setResetMaskedPhone(result.maskedPhone);
-      setResetCode("");
-      resetReqIdRef.current = "";
-      setStage("reset-otp");
-      const started = Date.now();
-      while (!window.sendOtp && Date.now() - started < 8000) {
-        await new Promise((resolve) => setTimeout(resolve, 150));
-      }
-      await sendOtpToPhone(phone, resetReqIdRef, "Password reset OTP sent.");
-    } catch {
-      toast.success("If the details match an account, you can continue with phone verification.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const submitResetOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (resetCode.length !== 8) return toast.error("Enter the 8-digit OTP.");
-    if (resetPassword.length < 10) return toast.error("Password must be at least 10 characters.");
-    if (!window.verifyOtp || !resetChallenge) return toast.error("OTP service not ready.");
-    setBusy(true);
-    try {
-      const msg91Token: string = await new Promise((resolve, reject) => {
-        window.verifyOtp!(
-          resetCode,
-          (d) => {
-            const token = (typeof d === "object" && d?.access_token) || extractString(d);
-            if (!token || token.length < 10) return reject(new Error("No access token returned."));
-            resolve(token);
-          },
-          (failure) => reject(new Error(typeof failure === "string" ? failure : (failure?.message ?? "Invalid OTP."))),
-          resetReqIdRef.current || undefined,
-        );
-      });
-      await completeResetFn({ data: { challengeToken: resetChallenge, msg91Token, newPassword: resetPassword } });
-      toast.success("Password changed. You can sign in now.");
-      setPassword("");
-      setResetPassword("");
-      setResetCode("");
-      setStage("creds");
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Could not reset password.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const resendReset = async () => {
-    if (resendIn > 0 || !resetPhone) return;
-    setBusy(true);
-    if (window.retryOtp && resetReqIdRef.current) {
-      await new Promise<void>((resolve) => {
-        window.retryOtp!(11, () => { toast.success("New password reset OTP sent."); setResendIn(30); resolve(); }, () => resolve(), resetReqIdRef.current);
-      });
-    } else {
-      await sendOtpToPhone(resetPhone.replace(/[^\d+]/g, ""), resetReqIdRef, "Password reset OTP sent.");
-    }
-    setBusy(false);
-  };
-
   const resend = async () => {
     if (resendIn > 0 || !phoneRef.current) return;
     setBusy(true);
@@ -361,7 +269,7 @@ function Login() {
         );
       });
     } else {
-      await sendOtpToPhone(phoneRef.current, reqIdRef);
+      await sendOtpToPhone(phoneRef.current);
     }
     setBusy(false);
   };
@@ -379,16 +287,15 @@ function Login() {
       <main className="flex-1 grid place-items-center px-4 py-12">
         <Card className="w-full max-w-md p-8 glass shadow-elegant">
           <h1 className="font-display text-2xl font-semibold">
-            {stage === "creds" ? "Welcome back" : stage === "otp" ? "Verify this device" : stage === "reset" ? "Reset your password" : "Verify your phone"}
+            {stage === "creds" ? "Welcome back" : "Verify this device"}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {stage === "creds" && "Sign in to your Ashish Cloud workspace."}
-            {stage === "otp" && "We sent a one-time code to your registered mobile number. You'll only see this on a new device."}
-            {stage === "reset" && "Use your email and registered mobile number to verify ownership."}
-            {stage === "reset-otp" && "Enter the 8-digit code sent to your registered mobile number."}
+            {stage === "creds"
+              ? "Sign in to your Ashish Cloud workspace."
+              : "We sent a one-time code to your registered mobile number. You'll only see this on a new device."}
           </p>
 
-          {stage === "creds" && (
+          {stage === "creds" ? (
             <form className="mt-6 space-y-4" onSubmit={submitCreds}>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -398,7 +305,6 @@ function Login() {
                 <Label htmlFor="password">Password</Label>
                 <Input id="password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
               </div>
-              <Button type="button" variant="link" className="h-auto p-0 text-xs" onClick={() => setStage("reset")}>Forgot password?</Button>
               <label className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Checkbox checked={remember} onCheckedChange={(v) => setRemember(v === true)} /> Remember my email
               </label>
@@ -409,9 +315,7 @@ function Login() {
                 No account? <a href="/signup" className="text-primary hover:underline">Sign up free</a> — 1 GB, no card.
               </p>
             </form>
-          )}
-
-          {stage === "otp" && (
+          ) : (
             <form className="mt-6 space-y-5" onSubmit={submitOtp}>
               <div className="rounded-lg border bg-muted/30 px-3 py-2.5 text-sm flex items-center gap-2">
                 <ShieldCheck className="size-4 text-primary" />
@@ -420,55 +324,27 @@ function Login() {
               </div>
               <div className="flex justify-center">
                 <InputOTP maxLength={8} value={code} onChange={setCode}>
-                  <InputOTPGroup>{[0, 1, 2, 3, 4, 5, 6, 7].map((i) => <InputOTPSlot key={i} index={i} />)}</InputOTPGroup>
+                  <InputOTPGroup>
+                    {[0,1,2,3,4,5,6,7].map((i) => <InputOTPSlot key={i} index={i} />)}
+                  </InputOTPGroup>
                 </InputOTP>
               </div>
-              {!ready && <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5"><Loader2 className="size-3 animate-spin" /> Loading secure OTP service…</p>}
+              {!ready && (
+                <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5">
+                  <Loader2 className="size-3 animate-spin" /> Loading secure OTP service…
+                </p>
+              )}
               <Button type="submit" className="w-full" disabled={busy || code.length < 8}>
                 {busy && <Loader2 className="size-4 mr-2 animate-spin" />}Verify & continue
               </Button>
               <div className="flex items-center justify-between text-xs">
-                <button type="button" onClick={cancelOtp} className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1"><ArrowLeft className="size-3" /> Use a different account</button>
-                <button type="button" onClick={resend} disabled={resendIn > 0 || busy} className="text-primary disabled:text-muted-foreground hover:underline disabled:no-underline">{resendIn > 0 ? `Resend in ${resendIn}s` : "Resend code"}</button>
-              </div>
-            </form>
-          )}
-
-          {stage === "reset" && (
-            <form className="mt-6 space-y-4" onSubmit={submitResetRequest}>
-              <div className="space-y-2">
-                <Label htmlFor="reset-email">Account email</Label>
-                <Input id="reset-email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="reset-phone" className="flex items-center gap-1.5"><Phone className="size-3.5" /> Registered mobile number</Label>
-                <Input id="reset-phone" type="tel" inputMode="tel" autoComplete="tel" required value={resetPhone} onChange={(e) => setResetPhone(e.target.value)} placeholder="+91 98xxxxxxxx" />
-              </div>
-              <Button type="submit" className="w-full" disabled={busy}>{busy && <Loader2 className="size-4 mr-2 animate-spin" />}Send reset OTP</Button>
-              <Button type="button" variant="ghost" className="w-full" onClick={() => setStage("creds")}><ArrowLeft className="size-4 mr-2" /> Back to sign in</Button>
-            </form>
-          )}
-
-          {stage === "reset-otp" && (
-            <form className="mt-6 space-y-5" onSubmit={submitResetOtp}>
-              <div className="rounded-lg border bg-muted/30 px-3 py-2.5 text-sm flex items-center gap-2">
-                <KeyRound className="size-4 text-primary" />
-                <span className="text-muted-foreground">Code sent to</span>
-                <span className="font-medium">{resetMaskedPhone}</span>
-              </div>
-              <div className="flex justify-center">
-                <InputOTP maxLength={8} value={resetCode} onChange={setResetCode}>
-                  <InputOTPGroup>{[0, 1, 2, 3, 4, 5, 6, 7].map((i) => <InputOTPSlot key={i} index={i} />)}</InputOTPGroup>
-                </InputOTP>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="new-password">New password</Label>
-                <Input id="new-password" type="password" autoComplete="new-password" minLength={10} required value={resetPassword} onChange={(e) => setResetPassword(e.target.value)} placeholder="At least 10 characters" />
-              </div>
-              <Button type="submit" className="w-full" disabled={busy || resetCode.length < 8 || resetPassword.length < 10}>{busy && <Loader2 className="size-4 mr-2 animate-spin" />}Verify & change password</Button>
-              <div className="flex items-center justify-between text-xs">
-                <Button type="button" variant="ghost" size="sm" onClick={() => setStage("reset")}><ArrowLeft className="size-3 mr-1" /> Back</Button>
-                <Button type="button" variant="link" size="sm" onClick={resendReset} disabled={resendIn > 0 || busy}>{resendIn > 0 ? `Resend in ${resendIn}s` : "Resend code"}</Button>
+                <button type="button" onClick={cancelOtp} className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+                  <ArrowLeft className="size-3" /> Use a different account
+                </button>
+                <button type="button" onClick={resend} disabled={resendIn > 0 || busy}
+                  className="text-primary disabled:text-muted-foreground hover:underline disabled:no-underline">
+                  {resendIn > 0 ? `Resend in ${resendIn}s` : "Resend code"}
+                </button>
               </div>
             </form>
           )}
