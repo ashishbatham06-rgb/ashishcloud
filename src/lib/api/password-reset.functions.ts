@@ -87,7 +87,7 @@ export const completePasswordReset = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => resetCompleteSchema.parse(input))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { compareSecret, sha256 } = await import("@/lib/crypto.server");
+    const { sha256 } = await import("@/lib/crypto.server");
     const { verifyMsg91AccessToken, normalisePhone } = await import("@/lib/msg91.server");
 
     const { data: challenge } = await supabaseAdmin

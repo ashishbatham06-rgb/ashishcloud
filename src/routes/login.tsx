@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -164,7 +164,7 @@ function Login() {
   const goNext = (admin: boolean) =>
     navigate({ to: admin ? "/admin" : "/dashboard" });
 
-  const sendOtpToPhone = async (phone: string, requestIdRef: React.MutableRefObject<string>, label = "OTP sent to your phone.") => {
+  const sendOtpToPhone = async (phone: string, requestIdRef: MutableRefObject<string>, label = "OTP sent to your phone.") => {
     const digits = phone.replace(/[^\d+]/g, "");
     if (!window.sendOtp) {
       toast.error("OTP service still loading. Try again in a moment.");
@@ -211,7 +211,12 @@ function Login() {
         goNext(status.isAdmin);
         return;
       }
-      phoneRef.current = status.phone!;
+      const phone = status.phone;
+      if (!phone) {
+        goNext(status.isAdmin);
+        return;
+      }
+      phoneRef.current = phone;
       setMaskedPhone(status.maskedPhone);
       setStage("otp");
       // wait until widget is ready then auto-send
@@ -219,7 +224,7 @@ function Login() {
       while (!window.sendOtp && Date.now() - t0 < 8000) {
         await new Promise((r) => setTimeout(r, 150));
       }
-       await sendOtpToPhone(status.phone, reqIdRef);
+      await sendOtpToPhone(phone, reqIdRef);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Sign-in failed.";
       toast.error(msg);
@@ -356,7 +361,7 @@ function Login() {
         );
       });
     } else {
-      await sendOtpToPhone(phoneRef.current);
+      await sendOtpToPhone(phoneRef.current, reqIdRef);
     }
     setBusy(false);
   };
@@ -374,16 +379,16 @@ function Login() {
       <main className="flex-1 grid place-items-center px-4 py-12">
         <Card className="w-full max-w-md p-8 glass shadow-elegant">
           <h1 className="font-display text-2xl font-semibold">
-             {stage === "creds" ? "Welcome back" : stage === "otp" ? "Verify this device" : stage === "reset" ? "Reset your password" : "Verify your phone"}
+            {stage === "creds" ? "Welcome back" : stage === "otp" ? "Verify this device" : stage === "reset" ? "Reset your password" : "Verify your phone"}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-             {stage === "creds" && "Sign in to your Ashish Cloud workspace."}
-             {stage === "otp" && "We sent a one-time code to your registered mobile number. You'll only see this on a new device."}
-             {stage === "reset" && "Use your email and registered mobile number to verify ownership."}
-             {stage === "reset-otp" && "Enter the 8-digit code sent to your registered mobile number."}
+            {stage === "creds" && "Sign in to your Ashish Cloud workspace."}
+            {stage === "otp" && "We sent a one-time code to your registered mobile number. You'll only see this on a new device."}
+            {stage === "reset" && "Use your email and registered mobile number to verify ownership."}
+            {stage === "reset-otp" && "Enter the 8-digit code sent to your registered mobile number."}
           </p>
 
-          {stage === "creds" ? (
+          {stage === "creds" && (
             <form className="mt-6 space-y-4" onSubmit={submitCreds}>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -393,9 +398,7 @@ function Login() {
                 <Label htmlFor="password">Password</Label>
                 <Input id="password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
               </div>
-               <Button type="button" variant="link" className="h-auto p-0 text-xs" onClick={() => setStage("reset")}>
-                 Forgot password?
-               </Button>
+              <Button type="button" variant="link" className="h-auto p-0 text-xs" onClick={() => setStage("reset")}>Forgot password?</Button>
               <label className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Checkbox checked={remember} onCheckedChange={(v) => setRemember(v === true)} /> Remember my email
               </label>
@@ -406,7 +409,9 @@ function Login() {
                 No account? <a href="/signup" className="text-primary hover:underline">Sign up free</a> — 1 GB, no card.
               </p>
             </form>
-           ) : stage === "otp" ? (
+          )}
+
+          {stage === "otp" && (
             <form className="mt-6 space-y-5" onSubmit={submitOtp}>
               <div className="rounded-lg border bg-muted/30 px-3 py-2.5 text-sm flex items-center gap-2">
                 <ShieldCheck className="size-4 text-primary" />
@@ -415,68 +420,55 @@ function Login() {
               </div>
               <div className="flex justify-center">
                 <InputOTP maxLength={8} value={code} onChange={setCode}>
-                  <InputOTPGroup>
-                    {[0,1,2,3,4,5,6,7].map((i) => <InputOTPSlot key={i} index={i} />)}
-                  </InputOTPGroup>
+                  <InputOTPGroup>{[0, 1, 2, 3, 4, 5, 6, 7].map((i) => <InputOTPSlot key={i} index={i} />)}</InputOTPGroup>
                 </InputOTP>
               </div>
-              {!ready && (
-                <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5">
-                  <Loader2 className="size-3 animate-spin" /> Loading secure OTP service…
-                </p>
-           ) : stage === "reset" ? (
-             <form className="mt-6 space-y-4" onSubmit={submitResetRequest}>
-               <div className="space-y-2">
-                 <Label htmlFor="reset-email">Account email</Label>
-                 <Input id="reset-email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-               </div>
-               <div className="space-y-2">
-                 <Label htmlFor="reset-phone" className="flex items-center gap-1.5"><Phone className="size-3.5" /> Registered mobile number</Label>
-                 <Input id="reset-phone" type="tel" inputMode="tel" autoComplete="tel" required value={resetPhone} onChange={(e) => setResetPhone(e.target.value)} placeholder="+91 98xxxxxxxx" />
-               </div>
-               <Button type="submit" className="w-full" disabled={busy}>
-                 {busy && <Loader2 className="size-4 mr-2 animate-spin" />}Send reset OTP
-               </Button>
-               <Button type="button" variant="ghost" className="w-full" onClick={() => setStage("creds")}>
-                 <ArrowLeft className="size-4 mr-2" /> Back to sign in
-               </Button>
-             </form>
-           ) : (
-             <form className="mt-6 space-y-5" onSubmit={submitResetOtp}>
-               <div className="rounded-lg border bg-muted/30 px-3 py-2.5 text-sm flex items-center gap-2">
-                 <KeyRound className="size-4 text-primary" />
-                 <span className="text-muted-foreground">Code sent to</span>
-                 <span className="font-medium">{resetMaskedPhone}</span>
-               </div>
-               <div className="flex justify-center">
-                 <InputOTP maxLength={8} value={resetCode} onChange={setResetCode}>
-                   <InputOTPGroup>{[0,1,2,3,4,5,6,7].map((i) => <InputOTPSlot key={i} index={i} />)}</InputOTPGroup>
-                 </InputOTP>
-               </div>
-               <div className="space-y-2">
-                 <Label htmlFor="new-password">New password</Label>
-                 <Input id="new-password" type="password" autoComplete="new-password" minLength={10} required value={resetPassword} onChange={(e) => setResetPassword(e.target.value)} placeholder="At least 10 characters" />
-               </div>
-               <Button type="submit" className="w-full" disabled={busy || resetCode.length < 8 || resetPassword.length < 10}>
-                 {busy && <Loader2 className="size-4 mr-2 animate-spin" />}Verify & change password
-               </Button>
-               <div className="flex items-center justify-between text-xs">
-                 <Button type="button" variant="ghost" size="sm" onClick={() => setStage("reset")}><ArrowLeft className="size-3 mr-1" /> Back</Button>
-                 <Button type="button" variant="link" size="sm" onClick={resendReset} disabled={resendIn > 0 || busy}>{resendIn > 0 ? `Resend in ${resendIn}s` : "Resend code"}</Button>
-               </div>
-             </form>
-           )}
+              {!ready && <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5"><Loader2 className="size-3 animate-spin" /> Loading secure OTP service…</p>}
               <Button type="submit" className="w-full" disabled={busy || code.length < 8}>
                 {busy && <Loader2 className="size-4 mr-2 animate-spin" />}Verify & continue
               </Button>
               <div className="flex items-center justify-between text-xs">
-                <button type="button" onClick={cancelOtp} className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-                  <ArrowLeft className="size-3" /> Use a different account
-                </button>
-                <button type="button" onClick={resend} disabled={resendIn > 0 || busy}
-                  className="text-primary disabled:text-muted-foreground hover:underline disabled:no-underline">
-                  {resendIn > 0 ? `Resend in ${resendIn}s` : "Resend code"}
-                </button>
+                <button type="button" onClick={cancelOtp} className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1"><ArrowLeft className="size-3" /> Use a different account</button>
+                <button type="button" onClick={resend} disabled={resendIn > 0 || busy} className="text-primary disabled:text-muted-foreground hover:underline disabled:no-underline">{resendIn > 0 ? `Resend in ${resendIn}s` : "Resend code"}</button>
+              </div>
+            </form>
+          )}
+
+          {stage === "reset" && (
+            <form className="mt-6 space-y-4" onSubmit={submitResetRequest}>
+              <div className="space-y-2">
+                <Label htmlFor="reset-email">Account email</Label>
+                <Input id="reset-email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reset-phone" className="flex items-center gap-1.5"><Phone className="size-3.5" /> Registered mobile number</Label>
+                <Input id="reset-phone" type="tel" inputMode="tel" autoComplete="tel" required value={resetPhone} onChange={(e) => setResetPhone(e.target.value)} placeholder="+91 98xxxxxxxx" />
+              </div>
+              <Button type="submit" className="w-full" disabled={busy}>{busy && <Loader2 className="size-4 mr-2 animate-spin" />}Send reset OTP</Button>
+              <Button type="button" variant="ghost" className="w-full" onClick={() => setStage("creds")}><ArrowLeft className="size-4 mr-2" /> Back to sign in</Button>
+            </form>
+          )}
+
+          {stage === "reset-otp" && (
+            <form className="mt-6 space-y-5" onSubmit={submitResetOtp}>
+              <div className="rounded-lg border bg-muted/30 px-3 py-2.5 text-sm flex items-center gap-2">
+                <KeyRound className="size-4 text-primary" />
+                <span className="text-muted-foreground">Code sent to</span>
+                <span className="font-medium">{resetMaskedPhone}</span>
+              </div>
+              <div className="flex justify-center">
+                <InputOTP maxLength={8} value={resetCode} onChange={setResetCode}>
+                  <InputOTPGroup>{[0, 1, 2, 3, 4, 5, 6, 7].map((i) => <InputOTPSlot key={i} index={i} />)}</InputOTPGroup>
+                </InputOTP>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-password">New password</Label>
+                <Input id="new-password" type="password" autoComplete="new-password" minLength={10} required value={resetPassword} onChange={(e) => setResetPassword(e.target.value)} placeholder="At least 10 characters" />
+              </div>
+              <Button type="submit" className="w-full" disabled={busy || resetCode.length < 8 || resetPassword.length < 10}>{busy && <Loader2 className="size-4 mr-2 animate-spin" />}Verify & change password</Button>
+              <div className="flex items-center justify-between text-xs">
+                <Button type="button" variant="ghost" size="sm" onClick={() => setStage("reset")}><ArrowLeft className="size-3 mr-1" /> Back</Button>
+                <Button type="button" variant="link" size="sm" onClick={resendReset} disabled={resendIn > 0 || busy}>{resendIn > 0 ? `Resend in ${resendIn}s` : "Resend code"}</Button>
               </div>
             </form>
           )}
