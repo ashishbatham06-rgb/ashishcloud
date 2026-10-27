@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { InstallAppBanner } from "@/components/install-app-banner";
 import { CloudScene } from "@/components/cloud-scene";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -191,6 +192,7 @@ function Landing() {
           </Card>
         </section>
       </main>
+      <InstallAppBanner />
       <SiteFooter />
     </div>
   );
