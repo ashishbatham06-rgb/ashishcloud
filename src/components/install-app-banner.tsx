@@ -39,7 +39,7 @@ export function InstallAppBanner() {
     };
   }, []);
 
-  if (!visible) return null;
+  if (isNative || !visible) return null;
 
   const dismiss = () => {
     try {
