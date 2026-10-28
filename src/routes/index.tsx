@@ -3,11 +3,14 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { InstallAppBanner } from "@/components/install-app-banner";
 import { CloudScene } from "@/components/cloud-scene";
+import { ApkDownloadButton } from "@/components/apk-download-button";
+import { APK_VERSION } from "@/lib/apk";
+import { useIsNativeApp } from "@/hooks/use-native-app";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   Shield, Share2, Upload, Users, KeyRound, Sparkles, Lock, Zap,
-  Gauge, Check, Mail, ArrowRight,
+  Gauge, Check, Mail, ArrowRight, Smartphone,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -59,6 +62,7 @@ function Landing() {
               <Button asChild size="lg" variant="outline">
                 <a href="#pricing">See pricing</a>
               </Button>
+              <ApkDownloadButton />
             </div>
 
             {/* Floating preview tile */}
