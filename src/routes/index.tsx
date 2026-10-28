@@ -62,6 +62,7 @@ function Landing() {
               <Button asChild size="lg" variant="outline">
                 <a href="#pricing">See pricing</a>
               </Button>
+              <ApkDownloadButton />
             </div>
 
             {/* Floating preview tile */}
