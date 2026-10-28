@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useIsNativeApp } from "@/hooks/use-native-app";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -10,6 +11,7 @@ type BeforeInstallPromptEvent = Event & {
 const DISMISS_KEY = "ashishcloud-install-hint-dismissed";
 
 export function InstallAppBanner() {
+  const isNative = useIsNativeApp();
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
 
@@ -37,7 +39,7 @@ export function InstallAppBanner() {
     };
   }, []);
 
-  if (!visible) return null;
+  if (isNative || !visible) return null;
 
   const dismiss = () => {
     try {
