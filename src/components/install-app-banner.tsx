@@ -59,8 +59,8 @@ export function InstallAppBanner() {
             <p className="text-sm font-semibold">Get Ashish Cloud as an app</p>
             <p className="mt-1 text-xs text-muted-foreground">
               {installEvent
-                ? "Install the Web APK on your device — one tap, no Play Store needed."
-                : "Download our Web APK: open the Chrome menu (⋮) and tap “Install app” or “Add to Home screen”."}
+                ? "One tap to install — no Play Store needed. Or grab the direct Android APK."
+                : "Download the official Android APK and install it straight on your phone."}
             </p>
           </div>
           <button
