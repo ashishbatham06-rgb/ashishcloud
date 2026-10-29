@@ -72,23 +72,30 @@ export function InstallAppBanner() {
             <X className="size-4" />
           </button>
         </div>
-        {installEvent && (
-          <Button
-            size="sm"
-            className="mt-3 w-full"
-            onClick={async () => {
-              try {
-                await installEvent.prompt();
-                await installEvent.userChoice;
-              } catch {
-                /* user dismissed */
-              }
-              setVisible(false);
-            }}
-          >
-            Install Web APK
-          </Button>
-        )}
+          <div className="mt-3 flex gap-2">
+            <Button size="sm" variant="outline" asChild className="flex-1">
+              <a href={APK_DOWNLOAD_URL} download>
+                <Download className="mr-1 size-3.5" /> Android APK
+              </a>
+            </Button>
+            {installEvent && (
+              <Button
+                size="sm"
+                className="flex-1"
+                onClick={async () => {
+                  try {
+                    await installEvent.prompt();
+                    await installEvent.userChoice;
+                  } catch {
+                    /* user dismissed */
+                  }
+                  setVisible(false);
+                }}
+              >
+                Install app
+              </Button>
+            )}
+          </div>
       </div>
     </div>
   );
