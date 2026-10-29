@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { Cloud } from "lucide-react";
+import { Cloud, Download } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { Button } from "@/components/ui/button";
+import { useIsNativeApp } from "@/hooks/use-native-app";
+import { APK_DOWNLOAD_URL } from "@/lib/apk";
 
 const links = [
   { to: "/", label: "Home" },
@@ -11,6 +13,7 @@ const links = [
 ] as const;
 
 export function SiteHeader() {
+  const isNative = useIsNativeApp();
   return (
     <header className="sticky top-0 z-40 glass border-b">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-4">
@@ -37,6 +40,17 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2">
+          {!isNative && (
+            <a
+              href={APK_DOWNLOAD_URL}
+              download
+              aria-label="Download Android APK"
+              title="Download Android APK"
+              className="grid size-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground md:hidden"
+            >
+              <Download className="size-4" />
+            </a>
+          )}
           <ThemeToggle />
           <Button asChild size="sm" variant="ghost">
             <Link to="/login">Log in</Link>

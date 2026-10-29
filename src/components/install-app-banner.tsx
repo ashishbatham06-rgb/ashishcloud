@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsNativeApp } from "@/hooks/use-native-app";
+import { APK_DOWNLOAD_URL } from "@/lib/apk";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -58,8 +59,8 @@ export function InstallAppBanner() {
             <p className="text-sm font-semibold">Get Ashish Cloud as an app</p>
             <p className="mt-1 text-xs text-muted-foreground">
               {installEvent
-                ? "Install the Web APK on your device — one tap, no Play Store needed."
-                : "Download our Web APK: open the Chrome menu (⋮) and tap “Install app” or “Add to Home screen”."}
+                ? "One tap to install — no Play Store needed. Or grab the direct Android APK."
+                : "Download the official Android APK and install it straight on your phone."}
             </p>
           </div>
           <button
@@ -71,23 +72,30 @@ export function InstallAppBanner() {
             <X className="size-4" />
           </button>
         </div>
-        {installEvent && (
-          <Button
-            size="sm"
-            className="mt-3 w-full"
-            onClick={async () => {
-              try {
-                await installEvent.prompt();
-                await installEvent.userChoice;
-              } catch {
-                /* user dismissed */
-              }
-              setVisible(false);
-            }}
-          >
-            Install Web APK
-          </Button>
-        )}
+          <div className="mt-3 flex gap-2">
+            <Button size="sm" variant="outline" asChild className="flex-1">
+              <a href={APK_DOWNLOAD_URL} download>
+                <Download className="mr-1 size-3.5" /> Android APK
+              </a>
+            </Button>
+            {installEvent && (
+              <Button
+                size="sm"
+                className="flex-1"
+                onClick={async () => {
+                  try {
+                    await installEvent.prompt();
+                    await installEvent.userChoice;
+                  } catch {
+                    /* user dismissed */
+                  }
+                  setVisible(false);
+                }}
+              >
+                Install app
+              </Button>
+            )}
+          </div>
       </div>
     </div>
   );

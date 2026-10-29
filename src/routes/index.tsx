@@ -182,6 +182,30 @@ function Landing() {
           ))}
         </section>
 
+        {/* ========== ANDROID APP STRIP ========== */}
+        <section className="mx-auto max-w-6xl px-4 mt-24">
+          <Card className="relative overflow-hidden p-8 md:p-10 glass shadow-soft">
+            <div aria-hidden className="absolute -right-16 -top-16 size-64 rounded-full bg-primary/15 blur-[100px]" />
+            <div className="relative flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+              <div className="flex items-start gap-4">
+                <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                  <Smartphone className="size-6" />
+                </span>
+                <div>
+                  <h3 className="font-display text-2xl font-semibold tracking-tight">Take your cloud in your pocket.</h3>
+                  <p className="mt-1.5 max-w-xl text-sm text-muted-foreground">
+                    The official Ashish Cloud Android app — direct APK install, no Play Store, no tracking. Same hardened login, same full-speed uploads.
+                  </p>
+                </div>
+              </div>
+              <div className="relative flex flex-col items-center gap-2">
+                <ApkDownloadButton />
+                <span className="text-[11px] text-muted-foreground/80">Latest release · {APK_VERSION}</span>
+              </div>
+            </div>
+          </Card>
+        </section>
+
         {/* ========== CTA ========== */}
         <section className="mx-auto max-w-6xl px-4 mt-24">
           <Card className="relative overflow-hidden p-10 md:p-14 glass shadow-elegant text-center">
