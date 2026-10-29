@@ -40,6 +40,17 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2">
+          {!isNative && (
+            <a
+              href={APK_DOWNLOAD_URL}
+              download
+              aria-label="Download Android APK"
+              title="Download Android APK"
+              className="grid size-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground md:hidden"
+            >
+              <Download className="size-4" />
+            </a>
+          )}
           <ThemeToggle />
           <Button asChild size="sm" variant="ghost">
             <Link to="/login">Log in</Link>
