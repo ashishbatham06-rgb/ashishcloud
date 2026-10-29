@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsNativeApp } from "@/hooks/use-native-app";
+import { APK_DOWNLOAD_URL } from "@/lib/apk";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
