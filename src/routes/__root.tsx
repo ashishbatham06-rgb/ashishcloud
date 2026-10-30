@@ -186,9 +186,16 @@ function RootComponent() {
     };
   }, [router, queryClient]);
 
+  useEffect(() => {
+    void registerPwa();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
+      <ClientOnly fallback={null}>
+        <OfflineBanner />
+      </ClientOnly>
       <Toaster richColors position="top-right" />
     </QueryClientProvider>
   );
