@@ -6,12 +6,17 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  ClientOnly,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { CloudOff } from "lucide-react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
+import { registerPwa } from "@/lib/pwa-register";
+import { OfflineBanner } from "@/components/offline-banner";
+import { isOfflineError } from "@/hooks/use-network-status";
 
 function NotFoundComponent() {
   return (
@@ -41,6 +46,42 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
+
+  if (isOfflineError(error)) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="max-w-md text-center">
+          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+            <CloudOff className="h-7 w-7 text-muted-foreground" />
+          </span>
+          <h1 className="mt-6 text-xl font-semibold tracking-tight text-foreground">
+            No internet connection
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            This page needs internet to load. Reconnect and try again — your
+            files and settings are safe.
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
+            <button
+              onClick={() => {
+                router.invalidate();
+                reset();
+              }}
+              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              Try again
+            </button>
+            <a
+              href="/"
+              className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            >
+              Go home
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
