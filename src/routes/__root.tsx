@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { CloudOff } from "lucide-react";
+import { initNativeChrome } from "@/lib/native";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -188,6 +189,7 @@ function RootComponent() {
 
   useEffect(() => {
     void registerPwa();
+    initNativeChrome();
   }, []);
 
   return (
