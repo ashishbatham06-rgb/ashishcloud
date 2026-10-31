@@ -16,13 +16,13 @@ export const Route = createFileRoute("/help")({
 });
 
 const faqs = [
-  { q: "How do I get an account?", a: "Free accounts are open — sign up directly from the login page. For Plan B or custom plans, email ashishcloudservices@gmail.com." },
-  { q: "What's the upload limit?", a: "Each file can be up to 1 GB. Storage quota depends on your plan: 1 GB on Free, 5 GB on Plan B, custom on Enterprise." },
+  { q: "How do I get an account?", a: "Free accounts are open — sign up directly from the login page. For extra storage or anything special, email ashishcloudservices@gmail.com." },
+  { q: "What's the upload limit?", a: "Each file can be up to 1 GB. Your storage quota is shown on the dashboard, and admins can raise it anytime." },
   { q: "How do shares work?", a: "Generate a link from any file. Add a password, expiry, or maximum download count. Every visitor goes through a validation step before getting a short-lived download URL." },
   { q: "Is my data encrypted?", a: "All transfers use TLS. Storage is encrypted at rest. Passwords and OTPs are hashed; row-level access control gates every query." },
   { q: "How does sign-in work?", a: "First-time signup requires email + password + an 8-digit SMS OTP to verify your number. After that, the same device logs in with just email + password. A new device triggers another OTP for safety." },
   { q: "Can I delete a file forever?", a: "Yes. Deletes mark the row first (recoverable for 30 days), then the object is permanently removed and your quota is freed." },
-  { q: "What about egress fees?", a: "Zero. Downloads are free, on every plan, always." },
+  { q: "What about egress fees?", a: "Zero. Downloads are free, always." },
 ];
 
 function Help() {
