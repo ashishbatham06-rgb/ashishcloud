@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Ashish Cloud",
+    "slug": "ashish-cloud",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "splash": { "image": "./assets/icon.png", "resizeMode": "contain", "backgroundColor": "#F5F6FB" },
+    "android": {
+      "package": "com.ashishcloud.native",
+      "adaptiveIcon": { "foregroundImage": "./assets/icon.png", "backgroundColor": "#F5F6FB" },
+      "permissions": [
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO",
+        "READ_EXTERNAL_STORAGE",
+        "RECEIVE_BOOT_COMPLETED",
+        "WAKE_LOCK"
+      ]
+    },
+    "plugins": [
+      ["expo-media-library", { "photosPermission": "Ashish Cloud needs access to back up your photos and videos." }],
+      ["expo-image-picker", { "photosPermission": "Choose photos and videos to upload." }]
+    ]
+  }
+}

@@ -21,6 +21,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as STokenRouteImport } from './routes/s.$token'
+import { Route as ApiMobileFileUrlRouteImport } from './routes/api/mobile/file-url'
 import { Route as ApiPublicSeedAdminRouteImport } from './routes/api/public/seed-admin'
 import { Route as ApiPublicUserExistsRouteImport } from './routes/api/public/user-exists'
 import { Route as ApiPublicSTokenRouteImport } from './routes/api/public/s.$token'
@@ -84,6 +85,11 @@ const STokenRoute = STokenRouteImport.update({
   path: '/s/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMobileFileUrlRoute = ApiMobileFileUrlRouteImport.update({
+  id: '/api/mobile/file-url',
+  path: '/api/mobile/file-url',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSeedAdminRoute = ApiPublicSeedAdminRouteImport.update({
   id: '/api/public/seed-admin',
   path: '/api/public/seed-admin',
@@ -112,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/api/upload': typeof ApiUploadRoute
   '/invite/$token': typeof InviteTokenRoute
   '/s/$token': typeof STokenRoute
+  '/api/mobile/file-url': typeof ApiMobileFileUrlRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/user-exists': typeof ApiPublicUserExistsRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByTo {
   '/api/upload': typeof ApiUploadRoute
   '/invite/$token': typeof InviteTokenRoute
   '/s/$token': typeof STokenRoute
+  '/api/mobile/file-url': typeof ApiMobileFileUrlRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/user-exists': typeof ApiPublicUserExistsRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   '/api/upload': typeof ApiUploadRoute
   '/invite/$token': typeof InviteTokenRoute
   '/s/$token': typeof STokenRoute
+  '/api/mobile/file-url': typeof ApiMobileFileUrlRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/user-exists': typeof ApiPublicUserExistsRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
     | '/api/upload'
     | '/invite/$token'
     | '/s/$token'
+    | '/api/mobile/file-url'
     | '/api/public/seed-admin'
     | '/api/public/user-exists'
     | '/api/public/s/$token'
@@ -180,6 +190,7 @@ export interface FileRouteTypes {
     | '/api/upload'
     | '/invite/$token'
     | '/s/$token'
+    | '/api/mobile/file-url'
     | '/api/public/seed-admin'
     | '/api/public/user-exists'
     | '/api/public/s/$token'
@@ -197,6 +208,7 @@ export interface FileRouteTypes {
     | '/api/upload'
     | '/invite/$token'
     | '/s/$token'
+    | '/api/mobile/file-url'
     | '/api/public/seed-admin'
     | '/api/public/user-exists'
     | '/api/public/s/$token'
@@ -213,6 +225,7 @@ export interface RootRouteChildren {
   ApiUploadRoute: typeof ApiUploadRoute
   InviteTokenRoute: typeof InviteTokenRoute
   STokenRoute: typeof STokenRoute
+  ApiMobileFileUrlRoute: typeof ApiMobileFileUrlRoute
   ApiPublicSeedAdminRoute: typeof ApiPublicSeedAdminRoute
   ApiPublicUserExistsRoute: typeof ApiPublicUserExistsRoute
   ApiPublicSTokenRoute: typeof ApiPublicSTokenRoute
@@ -304,6 +317,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof STokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/mobile/file-url': {
+      id: '/api/mobile/file-url'
+      path: '/api/mobile/file-url'
+      fullPath: '/api/mobile/file-url'
+      preLoaderRoute: typeof ApiMobileFileUrlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/seed-admin': {
       id: '/api/public/seed-admin'
       path: '/api/public/seed-admin'
@@ -352,6 +372,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiUploadRoute: ApiUploadRoute,
   InviteTokenRoute: InviteTokenRoute,
   STokenRoute: STokenRoute,
+  ApiMobileFileUrlRoute: ApiMobileFileUrlRoute,
   ApiPublicSeedAdminRoute: ApiPublicSeedAdminRoute,
   ApiPublicUserExistsRoute: ApiPublicUserExistsRoute,
   ApiPublicSTokenRoute: ApiPublicSTokenRoute,
