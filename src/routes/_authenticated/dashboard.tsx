@@ -27,6 +27,7 @@ import {
   X, ChevronLeft, ChevronRight, Move, Play,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { haptic } from "@/lib/native";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Ashish Cloud" }] }),
@@ -157,7 +158,10 @@ function Dashboard() {
 
     setUploading(false);
     setProgress(null);
-    if (okCount) toast.success(`Uploaded ${okCount} file${okCount > 1 ? "s" : ""}.`);
+    if (okCount) {
+      haptic("success");
+      toast.success(`Uploaded ${okCount} file${okCount > 1 ? "s" : ""}.`);
+    }
     qc.invalidateQueries({ queryKey: ["files"] });
     qc.invalidateQueries({ queryKey: ["me"] });
   }, [quality, qc, activeFolder, presignFn, confirmFn]);
@@ -179,6 +183,7 @@ function Dashboard() {
     if (!selected.size) return;
     if (!confirm(`Delete ${selected.size} file(s)? This cannot be undone.`)) return;
     for (const id of selected) await deleteFn({ data: { fileId: id } });
+    haptic("warning");
     toast.success("Deleted.");
     setSelected(new Set());
     qc.invalidateQueries({ queryKey: ["files"] });
