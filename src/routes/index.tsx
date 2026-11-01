@@ -70,7 +70,7 @@ function PhoneMockup() {
           <div className="grid grid-cols-3 gap-2 p-4">
             {mockTiles.map((t) => (
               <div key={t.label} className="rounded-xl border bg-card p-2.5 shadow-soft">
-                <t.icon className={`size-5 ${t.tint.split(" ")[1]} ${t.tint.split(" ")[0]}`} />
+                <t.icon className={`size-5 ${t.tint}`} />
                 <p className="mt-2 truncate text-[9px] text-muted-foreground">{t.label}</p>
               </div>
             ))}
