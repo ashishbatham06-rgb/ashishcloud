@@ -8,7 +8,7 @@
     "icon": "./assets/icon.png",
     "splash": { "image": "./assets/icon.png", "resizeMode": "contain", "backgroundColor": "#F5F6FB" },
     "android": {
-      "package": "com.ashishcloud.native",
+      "package": "com.ashishcloud.storage",
       "adaptiveIcon": { "foregroundImage": "./assets/icon.png", "backgroundColor": "#F5F6FB" },
       "permissions": [
         "READ_MEDIA_IMAGES",
