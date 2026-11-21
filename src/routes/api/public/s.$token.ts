@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sha256, compareSecret } from "@/lib/crypto.server";
-import { presignGetUrl } from "@/lib/r2.server";
+import { signGatewayToken } from "@/lib/crypto.server";
 import { logAudit, rateLimit } from "@/lib/audit.server";
 
 // Public share endpoint.
@@ -44,10 +44,10 @@ export const Route = createFileRoute("/api/public/s/$token")({
           if (!ok) return jsonErr(403, "Wrong password");
         }
 
-        const { data: file } = await supabaseAdmin.from("files").select("r2_key, name, mime").eq("id", link.file_id).single();
+        const { data: file } = await supabaseAdmin.from("files").select("id, name, mime").eq("id", link.file_id).single();
         if (!file) return jsonErr(404, "File missing");
         const inlineOk = !!file.mime && (file.mime.startsWith("image/") || file.mime.startsWith("video/") || file.mime.startsWith("audio/") || file.mime === "application/pdf");
-        const signed = await presignGetUrl(file.r2_key, wantDl || !inlineOk ? file.name : undefined);
+        const signed = `/api/gw/file/${signGatewayToken(file.id, wantDl || !inlineOk, 900)}`;
 
         await supabaseAdmin.from("share_links").update({ downloads: link.downloads + 1 }).eq("id", link.id);
         await logAudit({ action: "share.access", target: link.file_id, meta: { ip, dl: wantDl } });
@@ -67,10 +67,10 @@ export const Route = createFileRoute("/api/public/s/$token")({
           // Do not accept password in URL. Redirect to UI.
           return Response.redirect(new URL(`/s/${params.token}`, request.url).toString(), 302);
         }
-        const { data: file } = await supabaseAdmin.from("files").select("r2_key, name, mime").eq("id", link.file_id).single();
+        const { data: file } = await supabaseAdmin.from("files").select("id, name, mime").eq("id", link.file_id).single();
         if (!file) return new Response("File missing", { status: 404 });
         const inlineOk = !!file.mime && (file.mime.startsWith("image/") || file.mime.startsWith("video/") || file.mime.startsWith("audio/") || file.mime === "application/pdf");
-        const signed = await presignGetUrl(file.r2_key, inlineOk ? undefined : file.name);
+        const signed = new URL(`/api/gw/file/${signGatewayToken(file.id, !inlineOk, 900)}`, request.url).toString();
         await supabaseAdmin.from("share_links").update({ downloads: link.downloads + 1 }).eq("id", link.id);
         await logAudit({ action: "share.access", target: link.file_id, meta: { ip } });
         return Response.redirect(signed, 302);

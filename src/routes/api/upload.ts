@@ -13,6 +13,10 @@ export const Route = createFileRoute("/api/upload")({
         try {
           if (!isR2Configured()) return new Response("Storage is not configured yet.", { status: 503 });
 
+          const origin = request.headers.get("origin");
+          if (origin && origin !== new URL(request.url).origin && !origin.startsWith("capacitor://") && origin !== "https://localhost") {
+            return new Response("Forbidden origin", { status: 403 });
+          }
           const authHeader = request.headers.get("authorization") || "";
           const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
           if (!token) return new Response("Unauthorized", { status: 401 });
@@ -34,6 +38,7 @@ export const Route = createFileRoute("/api/upload")({
           const folder = String(form.get("folder") || "/").trim() || "/";
           if (!(file instanceof File)) return new Response("Missing file.", { status: 400 });
           if (!file.size || file.size > MAX_FILE_BYTES) return new Response("Invalid file size.", { status: 400 });
+          if (/\.(exe|bat|cmd|com|msi|scr|ps1|sh|jar|app|dmg|deb|rpm)$/i.test(file.name)) return new Response("File type not allowed.", { status: 415 });
           if (!["original", "high", "medium"].includes(quality)) return new Response("Invalid quality.", { status: 400 });
           if (folder !== "/" && !/^[a-zA-Z0-9 _\-]{1,60}$/.test(folder)) return new Response("Invalid folder.", { status: 400 });
 

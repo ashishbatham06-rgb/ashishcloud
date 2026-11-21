@@ -4,12 +4,11 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import {
   presignPutUrl,
-  presignGetUrl,
   deleteObject,
   makeKey,
   isR2Configured,
 } from "@/lib/r2.server";
-import { generateToken, sha256, hashSecret } from "@/lib/crypto.server";
+import { generateToken, sha256, hashSecret, signGatewayToken } from "@/lib/crypto.server";
 import { logAudit, rateLimit } from "@/lib/audit.server";
 
 const MAX_FILE_BYTES = 1024 * 1024 * 1024; // 1 GB
@@ -51,6 +50,8 @@ export const presignUpload = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
+    // Zero-trust: direct browser→storage uploads are disabled. Use /api/upload gateway.
+    if (process.env["ALLOW_DIRECT_UPLOAD"] !== "1") throw new Error("Direct uploads are disabled. Use the secure gateway.");
     if (!isR2Configured()) throw new Error("Storage is not configured yet. Admin needs to add Cloudflare R2 secrets.");
     if (BLOCKED_MIME.has(data.mime) || BLOCKED_EXT.test(data.name)) {
       throw new Error("This file type is not allowed for security reasons.");
@@ -218,7 +219,7 @@ export const presignView = createServerFn({ method: "POST" })
     const isAdmin = roles?.some((r) => r.role === "admin");
     if (file.owner_id !== context.userId && !isAdmin) throw new Error("Not allowed.");
     // inline view (no attachment disposition)
-    const url = await presignGetUrl(file.r2_key);
+    const url = `/api/gw/file/${signGatewayToken(file.id, false)}`;
     await bumpBilling("class_b_ops", 1);
     return { url, mime: file.mime, name: file.name };
   });
@@ -232,7 +233,7 @@ export const presignDownload = createServerFn({ method: "POST" })
     const { data: roles } = await supabaseAdmin.from("user_roles").select("role").eq("user_id", context.userId);
     const isAdmin = roles?.some((r) => r.role === "admin");
     if (file.owner_id !== context.userId && !isAdmin) throw new Error("Not allowed.");
-    const url = await presignGetUrl(file.r2_key, file.name);
+    const url = `/api/gw/file/${signGatewayToken(file.id, true)}`;
     await bumpBilling("class_b_ops", 1);
     await logAudit({ actorId: context.userId, action: "file.download", target: file.id });
     return { url };

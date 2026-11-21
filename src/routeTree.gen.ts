@@ -24,6 +24,7 @@ import { Route as STokenRouteImport } from './routes/s.$token'
 import { Route as ApiMobileFileUrlRouteImport } from './routes/api/mobile/file-url'
 import { Route as ApiPublicSeedAdminRouteImport } from './routes/api/public/seed-admin'
 import { Route as ApiPublicUserExistsRouteImport } from './routes/api/public/user-exists'
+import { Route as ApiGwFileTokenRouteImport } from './routes/api/gw/file/$token'
 import { Route as ApiPublicSTokenRouteImport } from './routes/api/public/s.$token'
 
 const IndexRoute = IndexRouteImport.update({
@@ -100,6 +101,11 @@ const ApiPublicUserExistsRoute = ApiPublicUserExistsRouteImport.update({
   path: '/api/public/user-exists',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiGwFileTokenRoute = ApiGwFileTokenRouteImport.update({
+  id: '/api/gw/file/$token',
+  path: '/api/gw/file/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSTokenRoute = ApiPublicSTokenRouteImport.update({
   id: '/api/public/s/$token',
   path: '/api/public/s/$token',
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/api/mobile/file-url': typeof ApiMobileFileUrlRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/user-exists': typeof ApiPublicUserExistsRoute
+  '/api/gw/file/$token': typeof ApiGwFileTokenRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
 }
 export interface FileRoutesByTo {
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/api/mobile/file-url': typeof ApiMobileFileUrlRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/user-exists': typeof ApiPublicUserExistsRoute
+  '/api/gw/file/$token': typeof ApiGwFileTokenRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
 }
 export interface FileRoutesById {
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/api/mobile/file-url': typeof ApiMobileFileUrlRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/user-exists': typeof ApiPublicUserExistsRoute
+  '/api/gw/file/$token': typeof ApiGwFileTokenRoute
   '/api/public/s/$token': typeof ApiPublicSTokenRoute
 }
 export interface FileRouteTypes {
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/api/mobile/file-url'
     | '/api/public/seed-admin'
     | '/api/public/user-exists'
+    | '/api/gw/file/$token'
     | '/api/public/s/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
     | '/api/mobile/file-url'
     | '/api/public/seed-admin'
     | '/api/public/user-exists'
+    | '/api/gw/file/$token'
     | '/api/public/s/$token'
   id:
     | '__root__'
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/api/mobile/file-url'
     | '/api/public/seed-admin'
     | '/api/public/user-exists'
+    | '/api/gw/file/$token'
     | '/api/public/s/$token'
   fileRoutesById: FileRoutesById
 }
@@ -228,6 +240,7 @@ export interface RootRouteChildren {
   ApiMobileFileUrlRoute: typeof ApiMobileFileUrlRoute
   ApiPublicSeedAdminRoute: typeof ApiPublicSeedAdminRoute
   ApiPublicUserExistsRoute: typeof ApiPublicUserExistsRoute
+  ApiGwFileTokenRoute: typeof ApiGwFileTokenRoute
   ApiPublicSTokenRoute: typeof ApiPublicSTokenRoute
 }
 
@@ -338,6 +351,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicUserExistsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/gw/file/$token': {
+      id: '/api/gw/file/$token'
+      path: '/api/gw/file/$token'
+      fullPath: '/api/gw/file/$token'
+      preLoaderRoute: typeof ApiGwFileTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/s/$token': {
       id: '/api/public/s/$token'
       path: '/api/public/s/$token'
@@ -375,6 +395,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiMobileFileUrlRoute: ApiMobileFileUrlRoute,
   ApiPublicSeedAdminRoute: ApiPublicSeedAdminRoute,
   ApiPublicUserExistsRoute: ApiPublicUserExistsRoute,
+  ApiGwFileTokenRoute: ApiGwFileTokenRoute,
   ApiPublicSTokenRoute: ApiPublicSTokenRoute,
 }
 export const routeTree = rootRouteImport

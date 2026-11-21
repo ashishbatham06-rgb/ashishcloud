@@ -9,7 +9,8 @@ export const Route = createFileRoute("/api/mobile/file-url")({
     handlers: {
       POST: async ({ request }) => {
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { presignGetUrl, isR2Configured } = await import("@/lib/r2.server");
+        const { isR2Configured } = await import("@/lib/r2.server");
+        const { signGatewayToken } = await import("@/lib/crypto.server");
         const { rateLimit } = await import("@/lib/audit.server");
         if (!isR2Configured()) return new Response("Storage not configured", { status: 503 });
         const auth = request.headers.get("authorization") || "";
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/api/mobile/file-url")({
           .eq("id", parsed.data.id)
           .maybeSingle();
         if (!f || f.owner_id !== u.user.id || f.deleted_at) return new Response("Not found", { status: 404 });
-        const url = await presignGetUrl(f.r2_key, parsed.data.download ? f.name : undefined, 900);
+        const url = new URL(`/api/gw/file/${signGatewayToken(parsed.data.id, !!parsed.data.download, 900)}`, request.url).toString();
         return Response.json({ url });
       },
     },

@@ -68,3 +68,14 @@ export function makeKey(userId: string, filename: string): string {
   const rand = Math.random().toString(36).slice(2, 8);
   return `users/${userId}/${stamp}-${rand}-${safe}`;
 }
+
+export async function getObjectStream(key: string, range?: string | null) {
+  const res = await r2Client().send(new GetObjectCommand({ Bucket: bucket(), Key: key, Range: range || undefined }));
+  return {
+    body: res.Body ? (res.Body as unknown as { transformToWebStream: () => ReadableStream }).transformToWebStream() : null,
+    contentLength: res.ContentLength,
+    contentRange: res.ContentRange,
+    contentType: res.ContentType,
+    etag: res.ETag,
+  };
+}
