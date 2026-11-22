@@ -12,3 +12,7 @@
 ## Deferred
 - [ ] Push notifications (FCM): needs google-services.json from user.
 - [ ] Auto background backup: current backup scans last 24h on app open; true background scheduling needs native plugin work.
+
+## Zero-trust gateway hardening
+- [ ] Audit and migrate browser + Android WebView auth/data/file traffic behind Ashish Cloud's same-origin gateway; preserve existing flows and verify after approval.
+- [ ] Keep direct Cloud Data API and storage-provider URLs out of client traffic; document unavoidable browser-visible gateway requests and TLS limits.

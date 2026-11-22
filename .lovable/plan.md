@@ -1,59 +1,20 @@
-# Plan — OTP fix + Invisly-style redesign + pricing/perf updates
+# Plan — Ashish Cloud secure gateway
 
-Big batch of changes. I'll ship them all in one pass.
+## Audit findings
+- Most dashboard/admin actions already call server functions on Ashish Cloud; file reads use the short-lived `/api/gw/file/...` gateway and uploads use `/api/upload`.
+- Login, signup, invite completion, session checks, and sign-out still call the Cloud auth service directly from the browser.
+- The standalone Expo app also calls Cloud auth and the Data API directly for sign-in, file lists, folders, and profile data.
+- The MSG91 widget is loaded by the browser; it is a third-party request, separate from database/storage access.
 
-## 1. OTP: 6 → 8 digits
-- Login + invite pages: change OTP input length to 8 (MSG91 widget config + any local validators).
-- Anywhere `length={6}` / `maxLength: 6` for OTP → `8`.
+## Build
+1. Add a first-party gateway auth/session flow using secure, HttpOnly, same-site cookies; proxy sign-in, refresh, sign-out, signup completion, and invite completion server-side.
+2. Move browser session checks and upload authentication to that gateway; add origin/CSRF checks, short-lived auth, refresh rotation, strict input validation, rate limits, and replay protections where state changes permit them.
+3. Move the Expo app's auth and user-scoped reads to same-origin mobile gateway APIs; keep its native bearer flow compatible while removing direct Data API calls.
+4. Keep all file bytes behind the existing authorized gateway; validate that privileged database and storage credentials remain server-only, RLS and private storage remain enforced, and unauthorized IDs are rejected.
+5. Test login/signup/invite, device OTP, dashboard reads, upload, view/download/share, logout, Android WebView behavior, and rejection cases; inspect the production-facing browser request destinations.
 
-## 2. Brand & messaging cleanup (remove backend mentions)
-- Remove all "Cloudflare R2", "Supabase", "S3-compatible" copy from landing, features, footer, how-it-works, help, contact.
-- Replace with neutral lines: "ultra-fast global storage", "zero-egress network", "private edge cloud".
-- Delete the **How it works** route + nav link entirely.
-- Trim landing sections that leak infra detail.
+## Important security boundary
+The browser will show requests made by that browser, even when they use one gateway. HTTPS protects traffic from passive network observers, but the user, browser developer tools, compromised device, and gateway server can inspect their respective plaintext. App-layer encryption cannot hide data from a client that must display or upload it. TLS 1.3 negotiation is controlled by the hosting edge, not guaranteed by frontend code; verify it at the published domain after deployment.
 
-## 3. New pricing (replaces current pricing band)
-| Plan | Storage | Price | Egress | How to get |
-|------|---------|-------|--------|------------|
-| Free | 1 GB | ₹0 | Free | Self sign-up |
-| Plan B | 5 GB | ₹30 / month | Free | Email request |
-| Custom / Enterprise | Any | Custom | Free | Email request |
-
-Contact email everywhere: **ashishcloudservices@gmail.com**.
-Free users can sign up themselves; Plan B and Custom show "Request access" → mailto link.
-
-## 4. Invisly-style 3D redesign (landing page)
-Reference: invisly.in — dark, glassy, big gradient orb / 3D blob hero, large display type, soft glow grid, sticky glass header, magnetic CTAs, scroll-reveal cards.
-
-Implementation (no heavy 3D libs — keep bundle small):
-- Animated CSS gradient mesh + radial glow orbs (blur-3xl) as hero backdrop.
-- Conic-gradient rotating ring behind headline.
-- Floating glass cards with subtle parallax on scroll (CSS transforms).
-- Refreshed tokens in `src/styles.css`: deeper near-black bg, vivid violet→cyan gradient, neon accent, soft shadow-glow.
-- Bigger display font (already have Inter Display via tokens — bump size + tracking).
-- Section reveal: `animate-fade-in` on intersection.
-- Sticky translucent header with backdrop-blur.
-
-Scope: landing (`/`), header, footer. Other app pages (dashboard/admin) untouched.
-
-## 5. Upload/download speed
-- Remove artificial concurrency caps in upload flow; parallelize presign + PUT (up to 6 concurrent parts/files).
-- Use `fetch` with streaming where supported; drop any throttling.
-- For downloads, presigned URL already streams directly from edge — ensure no proxy step; confirm `presignDownload` returns direct URL (it does).
-- Bump multipart threshold / concurrency in client uploader.
-
-## 6. Misc polish
-- Update site meta/title to drop backend references.
-- robots.txt unchanged.
-- Keep all auth/device-trust logic working as-is.
-
-## Files touched (approx)
-- `src/styles.css` — new tokens, gradient utilities
-- `src/routes/index.tsx` — full landing redesign
-- `src/components/site-header.tsx`, `site-footer.tsx` — glass + nav cleanup
-- `src/routes/login.tsx`, `src/routes/invite.$token.tsx` — OTP length 8
-- `src/routes/how-it-works.tsx` — delete
-- `src/routes/features.tsx`, `help.tsx`, `contact.tsx` — copy cleanup, new email
-- Upload component (find under dashboard) — concurrency bump
-
-Confirm and I'll build it all in one go.
+## Scope note
+The MSG91 widget remains a direct third-party browser connection unless its OTP delivery flow is separately replaced; no privileged key will be exposed to hide that request. Existing public APIs, share links, and Capacitor WebView behavior will be preserved.
