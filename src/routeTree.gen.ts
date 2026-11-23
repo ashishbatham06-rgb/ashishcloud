@@ -18,9 +18,12 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as ApiAuthRouteImport } from './routes/api/auth'
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as STokenRouteImport } from './routes/s.$token'
+import { Route as ApiMobileAuthRouteImport } from './routes/api/mobile/auth'
+import { Route as ApiMobileDataRouteImport } from './routes/api/mobile/data'
 import { Route as ApiMobileFileUrlRouteImport } from './routes/api/mobile/file-url'
 import { Route as ApiPublicSeedAdminRouteImport } from './routes/api/public/seed-admin'
 import { Route as ApiPublicUserExistsRouteImport } from './routes/api/public/user-exists'
@@ -71,6 +74,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiAuthRoute = ApiAuthRouteImport.update({
+  id: '/api/auth',
+  path: '/api/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiUploadRoute = ApiUploadRouteImport.update({
   id: '/api/upload',
   path: '/api/upload',
@@ -84,6 +92,16 @@ const InviteTokenRoute = InviteTokenRouteImport.update({
 const STokenRoute = STokenRouteImport.update({
   id: '/s/$token',
   path: '/s/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMobileAuthRoute = ApiMobileAuthRouteImport.update({
+  id: '/api/mobile/auth',
+  path: '/api/mobile/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMobileDataRoute = ApiMobileDataRouteImport.update({
+  id: '/api/mobile/data',
+  path: '/api/mobile/data',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiMobileFileUrlRoute = ApiMobileFileUrlRouteImport.update({
@@ -121,9 +139,12 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/api/auth': typeof ApiAuthRoute
   '/api/upload': typeof ApiUploadRoute
   '/invite/$token': typeof InviteTokenRoute
   '/s/$token': typeof STokenRoute
+  '/api/mobile/auth': typeof ApiMobileAuthRoute
+  '/api/mobile/data': typeof ApiMobileDataRoute
   '/api/mobile/file-url': typeof ApiMobileFileUrlRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/user-exists': typeof ApiPublicUserExistsRoute
@@ -139,9 +160,12 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/api/auth': typeof ApiAuthRoute
   '/api/upload': typeof ApiUploadRoute
   '/invite/$token': typeof InviteTokenRoute
   '/s/$token': typeof STokenRoute
+  '/api/mobile/auth': typeof ApiMobileAuthRoute
+  '/api/mobile/data': typeof ApiMobileDataRoute
   '/api/mobile/file-url': typeof ApiMobileFileUrlRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/user-exists': typeof ApiPublicUserExistsRoute
@@ -159,9 +183,12 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/api/auth': typeof ApiAuthRoute
   '/api/upload': typeof ApiUploadRoute
   '/invite/$token': typeof InviteTokenRoute
   '/s/$token': typeof STokenRoute
+  '/api/mobile/auth': typeof ApiMobileAuthRoute
+  '/api/mobile/data': typeof ApiMobileDataRoute
   '/api/mobile/file-url': typeof ApiMobileFileUrlRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/api/public/user-exists': typeof ApiPublicUserExistsRoute
@@ -179,9 +206,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin'
     | '/dashboard'
+    | '/api/auth'
     | '/api/upload'
     | '/invite/$token'
     | '/s/$token'
+    | '/api/mobile/auth'
+    | '/api/mobile/data'
     | '/api/mobile/file-url'
     | '/api/public/seed-admin'
     | '/api/public/user-exists'
@@ -197,9 +227,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin'
     | '/dashboard'
+    | '/api/auth'
     | '/api/upload'
     | '/invite/$token'
     | '/s/$token'
+    | '/api/mobile/auth'
+    | '/api/mobile/data'
     | '/api/mobile/file-url'
     | '/api/public/seed-admin'
     | '/api/public/user-exists'
@@ -216,9 +249,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
+    | '/api/auth'
     | '/api/upload'
     | '/invite/$token'
     | '/s/$token'
+    | '/api/mobile/auth'
+    | '/api/mobile/data'
     | '/api/mobile/file-url'
     | '/api/public/seed-admin'
     | '/api/public/user-exists'
@@ -234,9 +270,12 @@ export interface RootRouteChildren {
   HelpRoute: typeof HelpRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
+  ApiAuthRoute: typeof ApiAuthRoute
   ApiUploadRoute: typeof ApiUploadRoute
   InviteTokenRoute: typeof InviteTokenRoute
   STokenRoute: typeof STokenRoute
+  ApiMobileAuthRoute: typeof ApiMobileAuthRoute
+  ApiMobileDataRoute: typeof ApiMobileDataRoute
   ApiMobileFileUrlRoute: typeof ApiMobileFileUrlRoute
   ApiPublicSeedAdminRoute: typeof ApiPublicSeedAdminRoute
   ApiPublicUserExistsRoute: typeof ApiPublicUserExistsRoute
@@ -309,6 +348,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/auth': {
+      id: '/api/auth'
+      path: '/api/auth'
+      fullPath: '/api/auth'
+      preLoaderRoute: typeof ApiAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/upload': {
       id: '/api/upload'
       path: '/api/upload'
@@ -328,6 +374,20 @@ declare module '@tanstack/react-router' {
       path: '/s/$token'
       fullPath: '/s/$token'
       preLoaderRoute: typeof STokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mobile/auth': {
+      id: '/api/mobile/auth'
+      path: '/api/mobile/auth'
+      fullPath: '/api/mobile/auth'
+      preLoaderRoute: typeof ApiMobileAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mobile/data': {
+      id: '/api/mobile/data'
+      path: '/api/mobile/data'
+      fullPath: '/api/mobile/data'
+      preLoaderRoute: typeof ApiMobileDataRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/mobile/file-url': {
@@ -389,9 +449,12 @@ const rootRouteChildren: RootRouteChildren = {
   HelpRoute: HelpRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
+  ApiAuthRoute: ApiAuthRoute,
   ApiUploadRoute: ApiUploadRoute,
   InviteTokenRoute: InviteTokenRoute,
   STokenRoute: STokenRoute,
+  ApiMobileAuthRoute: ApiMobileAuthRoute,
+  ApiMobileDataRoute: ApiMobileDataRoute,
   ApiMobileFileUrlRoute: ApiMobileFileUrlRoute,
   ApiPublicSeedAdminRoute: ApiPublicSeedAdminRoute,
   ApiPublicUserExistsRoute: ApiPublicUserExistsRoute,

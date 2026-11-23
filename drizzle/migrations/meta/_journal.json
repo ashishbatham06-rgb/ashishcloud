@@ -15,6 +15,13 @@
       "when": 1793105381811,
       "tag": "0001_revoke_client_writes_sensitive_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795413669469,
+      "tag": "0002_gateway_rate_limits",
+      "breakpoints": true
     }
   ]
 }

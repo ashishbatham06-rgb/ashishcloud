@@ -164,6 +164,24 @@ export type Database = {
         }
         Relationships: []
       }
+      gateway_rate_limits: {
+        Row: {
+          bucket_hash: string
+          expires_at: string
+          hits: number
+        }
+        Insert: {
+          bucket_hash: string
+          expires_at: string
+          hits?: number
+        }
+        Update: {
+          bucket_hash?: string
+          expires_at?: string
+          hits?: number
+        }
+        Relationships: []
+      }
       invites: {
         Row: {
           created_at: string
@@ -369,6 +387,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consume_gateway_rate_limit: {
+        Args: {
+          p_bucket_hash: string
+          p_max_hits: number
+          p_window_seconds: number
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
