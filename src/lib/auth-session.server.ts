@@ -53,6 +53,12 @@ function base64UrlToBytes(value: string): Uint8Array | null {
   }
 }
 
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  const copy = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(copy).set(bytes);
+  return copy;
+}
+
 async function sessionKey(): Promise<CryptoKey> {
   const secret = process.env["BFF_SESSION_SECRET"];
   if (!secret || secret.length < 32) throw new Error("Secure session configuration is unavailable.");
@@ -80,9 +86,9 @@ async function openSession(value: string): Promise<StoredSession | null> {
   try {
     const key = await sessionKey();
     const clear = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv, additionalData: encoder.encode(COOKIE_NAME) },
+      { name: "AES-GCM", iv: toArrayBuffer(iv), additionalData: encoder.encode(COOKIE_NAME) },
       key,
-      ciphertext,
+      toArrayBuffer(ciphertext),
     );
     const parsed = JSON.parse(new TextDecoder().decode(clear)) as Partial<StoredSession>;
     if (
